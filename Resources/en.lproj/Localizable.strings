@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "Changes wait until the game restarts.";
 "Apply & Restart" = "Apply & Restart";
 "Preset" = "Preset";
+"Potato mode (below Lowest)" = "Potato mode (below Lowest)";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.";
 "Window size" = "Window size";
 "Show FPS counter" = "Show FPS counter";
 "FPS counter on from the next start." = "FPS counter on from the next start.";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "Reset to recommended settings?";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first.";
 "Reset" = "Reset";
+"Potato" = "Potato";
 "Lowest" = "Lowest";
 "Low" = "Low";
 "Normal" = "Normal";

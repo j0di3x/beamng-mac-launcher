@@ -9,7 +9,7 @@ for m in re.finditer(r'\bL\("((?:[^"\\]|\\.)*)"', src):
     if k not in keys:
         keys.append(k)
 # values passed as L(variable): presets, quality levels, connections
-for k in ["Lowest", "Low", "Normal", "High", "Ultra", "Custom", "Disabled", "USB", "Bluetooth", "Wireless"]:
+for k in ["Potato", "Lowest", "Low", "Normal", "High", "Ultra", "Custom", "Disabled", "USB", "Bluetooth", "Wireless"]:
     if k not in keys:
         keys.append(k)
 if __name__ == "__main__":

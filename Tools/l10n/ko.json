@@ -157,5 +157,8 @@
  "Driving %@": "%@ 운전 중",
  "Show in Discord status": "Discord 상태에 표시",
  "Discord isn't open. Your status appears once it is.": "Discord가 열려 있지 않습니다. 열면 상태가 표시됩니다.",
- "Friends see your map and car while you play.": "플레이하는 동안 친구에게 맵과 차량이 표시됩니다."
+ "Friends see your map and car while you play.": "플레이하는 동안 친구에게 맵과 차량이 표시됩니다.",
+ "Potato": "감자",
+ "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "감자: 최저보다 낮은 설정입니다. 절반 해상도, 30 FPS 제한, 모든 효과 끔, 주차 차량 없음. 오래된 Mac이나 8 GB Mac용. Gridmap이나 Small Island 같은 작은 맵이 가장 잘 돌아갑니다.",
+ "Potato mode (below Lowest)": "감자 모드 (최저보다 낮음)"
 }

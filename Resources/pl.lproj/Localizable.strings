@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "Zmiany czekają na ponowne uruchomienie gry.";
 "Apply & Restart" = "Zastosuj i uruchom ponownie";
 "Preset" = "Profil";
+"Potato mode (below Lowest)" = "Tryb ziemniaka (poniżej Najniższych)";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "Ziemniak: poniżej Najniższych. Połowa rozdzielczości, limit 30 FPS, wszystkie efekty wyłączone i brak zaparkowanych aut. Dla starszych Maców lub z 8 GB. Najlepiej działają małe mapy, np. Gridmap lub Small Island.";
 "Window size" = "Rozmiar okna";
 "Show FPS counter" = "Pokaż licznik FPS";
 "FPS counter on from the next start." = "Licznik FPS włączony od następnego uruchomienia.";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "Przywrócić zalecane ustawienia?";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "Profil Wysokie, pełna rozdzielczość z FSR 3, okno, poprawka drzew i Metal 4 włączone, poprawka mgły wyłączona. Obecne ustawienia gry zostaną najpierw zapisane w kopii.";
 "Reset" = "Przywróć";
+"Potato" = "Ziemniak";
 "Lowest" = "Najniższe";
 "Low" = "Niskie";
 "Normal" = "Normalne";

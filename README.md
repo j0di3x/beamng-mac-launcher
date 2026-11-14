@@ -29,6 +29,10 @@ See the [comparison](#gamehub-vs-launcher) below.
 
 - **Play / Quit / Restart** with live game status
 - **Graphics:** BeamNG's official presets (read from your game folder), window size, FPS counter (Metal HUD)
+- **Potato mode:** goes below the game's Lowest preset for older or 8 GB Macs: renders at half
+  resolution with FSR 3, caps at 30 FPS, turns every effect off and removes parked cars (each one is a
+  full physics vehicle). Your previous settings are backed up first, and switching it off restores
+  them to normal values
 - **Advanced:** anti-aliasing (FSR 3 recommended), render scale, sharpness, shadows, meshes
 - **Controllers:** shows a ✓ when a controller or steering wheel is connected (Xbox/PlayStation pads,
   Logitech, Thrustmaster, Fanatec, Moza, Simucube), plus what BeamNG detected last time

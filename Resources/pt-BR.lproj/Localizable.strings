@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "As alterações aguardam o jogo reiniciar.";
 "Apply & Restart" = "Aplicar e reiniciar";
 "Preset" = "Predefinição";
+"Potato mode (below Lowest)" = "Modo batata (abaixo do Mínimo)";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "Batata: abaixo do Mínimo. Metade da resolução, limite de 30 FPS, todos os efeitos desligados e sem carros estacionados. Para Macs antigos ou com 8 GB. Mapas pequenos como Gridmap ou Small Island rodam melhor.";
 "Window size" = "Tamanho da janela";
 "Show FPS counter" = "Mostrar contador de FPS";
 "FPS counter on from the next start." = "Contador de FPS ativado a partir da próxima abertura.";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "Restaurar as configurações recomendadas?";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "Predefinição Alto, resolução total com FSR 3, janela, correção de árvores e Metal 4 ativados, correção de neblina desativada. Antes é feito um backup das suas configurações atuais.";
 "Reset" = "Restaurar";
+"Potato" = "Batata";
 "Lowest" = "Mínimo";
 "Low" = "Baixo";
 "Normal" = "Normal";

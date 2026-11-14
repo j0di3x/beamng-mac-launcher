@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "更改将在游戏重启后生效。";
 "Apply & Restart" = "应用并重启";
 "Preset" = "预设";
+"Potato mode (below Lowest)" = "土豆模式（低于最低）";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "土豆：比最低还低。一半分辨率、30 FPS 上限、关闭所有特效、没有停放车辆。适合老款或 8 GB 内存的 Mac。Gridmap、Small Island 等小地图运行最流畅。";
 "Window size" = "窗口大小";
 "Show FPS counter" = "显示 FPS 计数器";
 "FPS counter on from the next start." = "下次启动起显示 FPS 计数器。";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "恢复推荐设置？";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "高预设、FSR 3 全分辨率、窗口模式，开启树木修复和 Metal 4，关闭雾效修复。会先备份你当前的游戏设置。";
 "Reset" = "恢复";
+"Potato" = "土豆";
 "Lowest" = "最低";
 "Low" = "低";
 "Normal" = "中";

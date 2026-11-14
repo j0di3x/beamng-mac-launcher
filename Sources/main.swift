@@ -533,6 +533,33 @@ final class Launcher: ObservableObject {
         return ["Lowest", "Low", "Normal", "High", "Ultra"].filter { all.contains($0) }
     }
 
+    /// Below the game's own Lowest: half-resolution rendering (FSR 3), a 30 FPS cap, every effect off and
+    /// no parked cars (each one is a full physics vehicle). For 8 GB / base-chip Macs.
+    static let potatoExtras: [String: Any] = [
+        "GraphicAntialiasType": "fsr3", "GraphicAntialias": 4,
+        "GraphicUpscalingQuality": 0.5, "GraphicUpscalingSharpness": 0.5,
+        "GraphicMaxDecalCount": 500, "GraphicGrassDensity": 0, "GraphicAnisotropic": 0,
+        "GraphicDynReflectionQuality": "Disabled", "GraphicDynMirrorsQuality": "Disabled",
+        "GraphicCloudsQuality": "Disabled",
+        "PostFXSSAOGeneralEnabled": false, "PostFXMotionBlurEnabled": false, "PostFXDOFGeneralEnabled": false,
+        "PostFXScreenSpaceShadowsEnabled": false, "PostFXSSREnabled": false,
+        "fpsLimitEnabled": true, "fpsLimit": 30, "fpsLimitBackgroundEnabled": true, "fpsLimitBackground": 10,
+        "trafficParkedVehicles": false, "trafficParkingAmount": 0,
+        "SkipGenerateLicencePlate": true, "vehicleShadowEnabled": false,
+    ]
+    /// What Potato changed that the game's own presets don't set back.
+    static let potatoUndo: [String: Any] = [
+        "GraphicUpscalingQuality": 1.0, "GraphicUpscalingSharpness": 0.3,
+        "PostFXSSAOGeneralEnabled": true, "PostFXMotionBlurEnabled": true,
+        "fpsLimitEnabled": false, "fpsLimitBackground": 30,
+        "trafficParkedVehicles": true, "trafficParkingAmount": 5, "vehicleShadowEnabled": true,
+    ]
+    static func isPotato(_ s: [String: Any]) -> Bool {
+        "\(s["GraphicOverallQuality"] ?? "")" == "Custom"
+            && (s["GraphicUpscalingQuality"] as? NSNumber)?.doubleValue == 0.5
+            && (s["fpsLimitEnabled"] as? Bool) == true && (s["trafficParkedVehicles"] as? Bool) == false
+    }
+
     init() {
         installScripts()
         if conf.gameDir.isEmpty, let found = Launcher.findGameDir() { conf.gameDir = found; conf.save() }
@@ -624,7 +651,7 @@ final class Launcher: ObservableObject {
         let d = gameDefaults(gameDir: conf.gameDir)
         let s = GameSettingsFile.load()
         func v(_ k: String) -> Any? { s[k] ?? d[k] }
-        preset = "\(v("GraphicOverallQuality") ?? "Normal")"
+        preset = Launcher.isPotato(s) ? "Potato" : "\(v("GraphicOverallQuality") ?? "Normal")"
         renderScale = (v("GraphicUpscalingQuality") as? NSNumber)?.doubleValue ?? 1
         aaType = (s["GraphicAntialias"] as? NSNumber)?.intValue == 0 ? "off" : "\(v("GraphicAntialiasType") ?? "fxaa")"
         sharpness = (v("GraphicUpscalingSharpness") as? NSNumber)?.doubleValue ?? 0.25
@@ -646,7 +673,21 @@ final class Launcher: ObservableObject {
     }
 
     func applyPreset(_ name: String) {
+        if name == "Potato" {
+            var p = gamePresets(gameDir: conf.gameDir)["Lowest"] ?? [:]
+            for (k, v) in Launcher.potatoExtras { p[k] = v }
+            p["GraphicOverallQuality"] = "Custom"
+            if state == .stopped, preset != "Potato" { GameSettingsFile.backup(tag: "before-potato") }
+            preset = "Potato"; shadows = "\(p["GraphicShadowsQuality"] ?? "Lowest")"; meshes = "\(p["GraphicMeshQuality"] ?? "Lowest")"
+            aaType = "fsr3"; renderScale = 0.5; sharpness = 0.5
+            change(p)
+            return
+        }
         guard var p = gamePresets(gameDir: conf.gameDir)[name] else { return }
+        if preset == "Potato" {
+            for (k, v) in Launcher.potatoUndo where p[k] == nil { p[k] = v }
+            renderScale = 1.0; sharpness = 0.3
+        }
         p["GraphicOverallQuality"] = name
         preset = name
         if let s = p["GraphicShadowsQuality"] { shadows = "\(s)" }
@@ -1412,9 +1453,14 @@ struct ContentView: View {
                 LabeledContent(L("Preset")) {
                     Picker("", selection: Binding(get: { m.preset }, set: { m.applyPreset($0) })) {
                         ForEach(m.presetNames, id: \.self) { Text(L($0)).tag($0) }
-                        if !m.presetNames.contains(m.preset) { Text(L(m.preset)).tag(m.preset) }
+                        if !m.presetNames.contains(m.preset) && m.preset != "Potato" { Text(L(m.preset)).tag(m.preset) }
                     }
                     .pickerStyle(.segmented).labelsHidden()
+                }
+                Toggle(L("Potato mode (below Lowest)"), isOn: Binding(get: { m.preset == "Potato" },
+                                                                    set: { m.applyPreset($0 ? "Potato" : "Lowest") }))
+                if m.preset == "Potato" {
+                    Caption(L("Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best."))
                 }
                 if showAdvanced { advancedGraphics }
                 LabeledContent(L("Window size")) {

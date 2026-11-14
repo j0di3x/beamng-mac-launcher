@@ -157,5 +157,8 @@
  "Driving %@": "A conduzir %@",
  "Show in Discord status": "Mostrar no estado do Discord",
  "Discord isn't open. Your status appears once it is.": "O Discord não está aberto. O seu estado aparece quando estiver.",
- "Friends see your map and car while you play.": "Os amigos veem o seu mapa e o seu carro enquanto joga."
+ "Friends see your map and car while you play.": "Os amigos veem o seu mapa e o seu carro enquanto joga.",
+ "Potato": "Batata",
+ "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "Batata: abaixo do Mínimo. Metade da resolução, limite de 30 FPS, todos os efeitos desligados e sem carros estacionados. Para Macs antigos ou com 8 GB. Mapas pequenos como Gridmap ou Small Island funcionam melhor.",
+ "Potato mode (below Lowest)": "Modo batata (abaixo do Mínimo)"
 }

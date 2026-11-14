@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "更改將在遊戲重新啟動後生效。";
 "Apply & Restart" = "應用並重新啟動";
 "Preset" = "預設";
+"Potato mode (below Lowest)" = "馬鈴薯模式（低於最低）";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "馬鈴薯：比最低還低。一半解析度、30 FPS 上限、關閉所有特效、沒有停放車輛。適合舊款或 8 GB 記憶體的 Mac。Gridmap、Small Island 等小地圖執行最順暢。";
 "Window size" = "視窗大小";
 "Show FPS counter" = "顯示 FPS 計數器";
 "FPS counter on from the next start." = "下次啟動起顯示 FPS 計數器。";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "恢復推薦設定？";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "高預設、FSR 3 全分辨率、視窗模式，開啓樹木修復和 Metal 4，關閉霧效修復。會先備份你當前的遊戲設定。";
 "Reset" = "恢復";
+"Potato" = "馬鈴薯";
 "Lowest" = "最低";
 "Low" = "低";
 "Normal" = "中";

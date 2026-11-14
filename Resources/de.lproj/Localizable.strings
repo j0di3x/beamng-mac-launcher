@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "Änderungen warten auf den Neustart des Spiels.";
 "Apply & Restart" = "Anwenden & neu starten";
 "Preset" = "Profil";
+"Potato mode (below Lowest)" = "Kartoffel-Modus (unter Minimal)";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "Kartoffel: unter Minimal. Halbe Auflösung, 30 FPS Limit, alle Effekte aus und keine geparkten Autos. Für ältere Macs oder Macs mit 8 GB. Kleine Karten wie Gridmap oder Small Island laufen am besten.";
 "Window size" = "Fenstergröße";
 "Show FPS counter" = "FPS-Anzeige einblenden";
 "FPS counter on from the next start." = "FPS-Anzeige ab dem nächsten Start an.";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "Auf empfohlene Einstellungen zurücksetzen?";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "Voreinstellung Hoch, volle Auflösung mit FSR 3, Fenster, Baum-Fix und Metal 4 an, Nebel-Fix aus. Deine aktuellen Spieleinstellungen werden vorher gesichert.";
 "Reset" = "Zurücksetzen";
+"Potato" = "Kartoffel";
 "Lowest" = "Minimal";
 "Low" = "Niedrig";
 "Normal" = "Normal";

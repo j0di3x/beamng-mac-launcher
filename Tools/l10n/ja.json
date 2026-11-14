@@ -157,5 +157,8 @@
  "Driving %@": "%@ を運転中",
  "Show in Discord status": "Discordのステータスに表示",
  "Discord isn't open. Your status appears once it is.": "Discordが開いていません。開くとステータスが表示されます。",
- "Friends see your map and car while you play.": "プレイ中のマップと車がフレンドに表示されます。"
+ "Friends see your map and car while you play.": "プレイ中のマップと車がフレンドに表示されます。",
+ "Potato": "ポテト",
+ "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "ポテト：「最低」よりさらに軽い設定です。解像度半分、30 FPS制限、すべての効果をオフ、駐車車両なし。古いMacや8 GBのMac向け。GridmapやSmall Islandなど小さなマップが最も快適です。",
+ "Potato mode (below Lowest)": "ポテトモード（「最低」より軽い）"
 }

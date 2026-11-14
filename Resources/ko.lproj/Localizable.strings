@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "변경 사항은 게임을 재시작하면 적용됩니다.";
 "Apply & Restart" = "적용 후 재시작";
 "Preset" = "프리셋";
+"Potato mode (below Lowest)" = "감자 모드 (최저보다 낮음)";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "감자: 최저보다 낮은 설정입니다. 절반 해상도, 30 FPS 제한, 모든 효과 끔, 주차 차량 없음. 오래된 Mac이나 8 GB Mac용. Gridmap이나 Small Island 같은 작은 맵이 가장 잘 돌아갑니다.";
 "Window size" = "창 크기";
 "Show FPS counter" = "FPS 표시";
 "FPS counter on from the next start." = "다음 시작부터 FPS를 표시합니다.";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "권장 설정으로 재설정할까요?";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "높음 프리셋, FSR 3 전체 해상도, 창 모드, 나무 수정과 Metal 4 켬, 안개 수정 끔. 현재 게임 설정은 먼저 백업됩니다.";
 "Reset" = "재설정";
+"Potato" = "감자";
 "Lowest" = "최저";
 "Low" = "낮음";
 "Normal" = "보통";

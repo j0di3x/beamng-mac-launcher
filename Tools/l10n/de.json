@@ -157,5 +157,8 @@
  "Driving %@": "Fährt %@",
  "Show in Discord status": "Im Discord-Status anzeigen",
  "Discord isn't open. Your status appears once it is.": "Discord ist nicht geöffnet. Dein Status erscheint, sobald es läuft.",
- "Friends see your map and car while you play.": "Freunde sehen beim Spielen deine Karte und dein Auto."
+ "Friends see your map and car while you play.": "Freunde sehen beim Spielen deine Karte und dein Auto.",
+ "Potato": "Kartoffel",
+ "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "Kartoffel: unter Minimal. Halbe Auflösung, 30 FPS Limit, alle Effekte aus und keine geparkten Autos. Für ältere Macs oder Macs mit 8 GB. Kleine Karten wie Gridmap oder Small Island laufen am besten.",
+ "Potato mode (below Lowest)": "Kartoffel-Modus (unter Minimal)"
 }

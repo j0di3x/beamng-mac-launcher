@@ -157,5 +157,8 @@
  "Driving %@": "駕駛 %@",
  "Show in Discord status": "在 Discord 狀態中顯示",
  "Discord isn't open. Your status appears once it is.": "Discord 未開啟。開啟後會顯示你的狀態。",
- "Friends see your map and car while you play.": "好友可以看到你正在玩的地圖和車輛。"
+ "Friends see your map and car while you play.": "好友可以看到你正在玩的地圖和車輛。",
+ "Potato": "馬鈴薯",
+ "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "馬鈴薯：比最低還低。一半解析度、30 FPS 上限、關閉所有特效、沒有停放車輛。適合舊款或 8 GB 記憶體的 Mac。Gridmap、Small Island 等小地圖執行最順暢。",
+ "Potato mode (below Lowest)": "馬鈴薯模式（低於最低）"
 }

@@ -157,5 +157,8 @@
  "Driving %@": "Jedzie: %@",
  "Show in Discord status": "Pokaż w statusie Discorda",
  "Discord isn't open. Your status appears once it is.": "Discord nie jest otwarty. Status pojawi się, gdy go uruchomisz.",
- "Friends see your map and car while you play.": "Znajomi widzą twoją mapę i auto podczas gry."
+ "Friends see your map and car while you play.": "Znajomi widzą twoją mapę i auto podczas gry.",
+ "Potato": "Ziemniak",
+ "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "Ziemniak: poniżej Najniższych. Połowa rozdzielczości, limit 30 FPS, wszystkie efekty wyłączone i brak zaparkowanych aut. Dla starszych Maców lub z 8 GB. Najlepiej działają małe mapy, np. Gridmap lub Small Island.",
+ "Potato mode (below Lowest)": "Tryb ziemniaka (poniżej Najniższych)"
 }

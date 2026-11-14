@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "変更はゲームの再起動後に反映されます。";
 "Apply & Restart" = "適用して再起動";
 "Preset" = "プリセット";
+"Potato mode (below Lowest)" = "ポテトモード（「最低」より軽い）";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "ポテト：「最低」よりさらに軽い設定です。解像度半分、30 FPS制限、すべての効果をオフ、駐車車両なし。古いMacや8 GBのMac向け。GridmapやSmall Islandなど小さなマップが最も快適です。";
 "Window size" = "ウインドウサイズ";
 "Show FPS counter" = "FPSカウンタを表示";
 "FPS counter on from the next start." = "次回の起動からFPSカウンタを表示します。";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "推奨設定に戻しますか？";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "プリセット「高」、FSR 3でフル解像度、ウインドウ表示、木の修正とMetal 4をオン、霧の修正をオフにします。現在のゲーム設定は先にバックアップされます。";
 "Reset" = "リセット";
+"Potato" = "ポテト";
 "Lowest" = "最低";
 "Low" = "低";
 "Normal" = "標準";

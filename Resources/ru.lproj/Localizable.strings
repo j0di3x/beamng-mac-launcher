@@ -106,6 +106,8 @@
 "Changes wait until the game restarts." = "Изменения ждут перезапуска игры.";
 "Apply & Restart" = "Применить и перезапустить";
 "Preset" = "Пресет";
+"Potato mode (below Lowest)" = "Режим «картошка» (ниже минимальных)";
+"Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best." = "Картошка: ниже минимальных. Половинное разрешение, лимит 30 FPS, все эффекты выключены, без припаркованных машин. Для старых Mac или Mac с 8 ГБ. Лучше всего идут маленькие карты, например Gridmap или Small Island.";
 "Window size" = "Размер окна";
 "Show FPS counter" = "Показывать счётчик FPS";
 "FPS counter on from the next start." = "Счётчик FPS включится со следующего запуска.";
@@ -149,6 +151,7 @@
 "Reset to recommended settings?" = "Вернуть рекомендуемые настройки?";
 "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first." = "Пресет «Высокие», полное разрешение с FSR 3, оконный режим, исправление деревьев и Metal 4 включены, исправление тумана выключено. Текущие настройки игры сначала сохраняются в резервной копии.";
 "Reset" = "Сбросить";
+"Potato" = "Картошка";
 "Lowest" = "Минимальные";
 "Low" = "Низкие";
 "Normal" = "Средние";
