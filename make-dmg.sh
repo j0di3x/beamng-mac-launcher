@@ -1,31 +1,58 @@
 #!/bin/zsh
-# Builds the app and packs it into dist/BeamNG-Launcher-<version>.dmg (drag-to-Applications layout).
+# Builds the app and packs it into dist/BeamNG-Launcher-<version>.dmg with a styled
+# drag-to-Applications window (background from Tools/make-dmg-background.swift).
 set -e
 cd "${0:A:h}"
 ./build.sh
 VER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Resources/Info.plist)
-STAGE=$(mktemp -d)/BeamNG\ Launcher
-mkdir -p "$STAGE"
+VOL="BeamNG Launcher"
+WORK=$(mktemp -d)
+STAGE="$WORK/stage"
+mkdir -p "$STAGE/.background"
 ditto "build/BeamNG Launcher.app" "$STAGE/BeamNG Launcher.app"
 ln -s /Applications "$STAGE/Applications"
-cat > "$STAGE/READ ME FIRST.txt" <<TXT
-BeamNG Launcher for Mac $VER (unofficial)
+ditto --norsrc --noextattr Resources/dmg-background.tiff "$STAGE/.background/background.tiff"
 
-1. Drag "BeamNG Launcher" onto the Applications folder.
-2. The first time, RIGHT-CLICK the app and choose Open (it is not notarized by Apple).
-   If macOS still refuses: System Settings > Privacy & Security > "Open Anyway".
-3. In the launcher, finish the setup checklist:
-   - Import from GameHub (needs GameHub installed and any Windows game run once)
-   - Install .dmg... (Apple's "Evaluation environment for Windows games 4.0",
-     free download at developer.apple.com/download)
-   - Choose your BeamNG.drive folder
-4. Press Play.
-
-Source and help: https://github.com/j0di3x/beamng-mac-launcher
-TXT
+# writable image → lay out the window in Finder → compress
+[ -d "/Volumes/$VOL" ] && hdiutil detach "/Volumes/$VOL" -force >/dev/null 2>&1 || true
+hdiutil create -volname "$VOL" -srcfolder "$STAGE" -fs HFS+ -format UDRW -ov "$WORK/rw.dmg" >/dev/null
+hdiutil attach -readwrite -noverify -noautoopen "$WORK/rw.dmg" >/dev/null
+sleep 2
+osascript <<OSA
+tell application "Finder"
+  tell disk "$VOL"
+    open
+    set current view of container window to icon view
+    set toolbar visible of container window to false
+    set statusbar visible of container window to false
+    try
+      set pathbar visible of container window to false
+    end try
+    set the bounds of container window to {200, 120, 840, 568}
+    set opts to the icon view options of container window
+    set arrangement of opts to not arranged
+    set icon size of opts to 96
+    set text size of opts to 13
+    set background picture of opts to file ".background:background.tiff"
+    set position of item "BeamNG Launcher.app" of container window to {170, 190}
+    set position of item "Applications" of container window to {470, 190}
+    update without registering applications
+    delay 1
+    close
+    open
+    set the bounds of container window to {200, 120, 840, 568}
+    delay 1
+    close
+  end tell
+end tell
+OSA
+# wait for Finder to write the window settings (.DS_Store) before ejecting
+for i in {1..20}; do [ -f "/Volumes/$VOL/.DS_Store" ] && break; sleep 0.5; done
+sleep 1; sync
+hdiutil detach "/Volumes/$VOL" >/dev/null
 mkdir -p dist
 OUT="dist/BeamNG-Launcher-$VER.dmg"
 rm -f "$OUT"
-hdiutil create -volname "BeamNG Launcher" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "$OUT" >/dev/null
-rm -rf "${STAGE:h}"
+hdiutil convert "$WORK/rw.dmg" -format UDZO -imagekey zlib-level=9 -o "$OUT" >/dev/null
+rm -rf "$WORK"
 shasum -a 256 "$OUT"
