@@ -151,5 +151,11 @@
  "Using GPTK %@.": "正在使用 GPTK %@。",
  "Window size": "視窗大小",
  "Wine runtime": "Wine 執行環境",
- "Wireless": "無線"
+ "Wireless": "無線",
+ "Starting the game": "正在啟動遊戲",
+ "In the menus": "在選單中",
+ "Driving %@": "駕駛 %@",
+ "Show in Discord status": "在 Discord 狀態中顯示",
+ "Discord isn't open. Your status appears once it is.": "Discord 未開啟。開啟後會顯示你的狀態。",
+ "Friends see your map and car while you play.": "好友可以看到你正在玩的地圖和車輛。"
 }

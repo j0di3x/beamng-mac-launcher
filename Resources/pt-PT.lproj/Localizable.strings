@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "Feche primeiro o jogo para alterar os mods.";
 "Fog fix turned on." = "Correção do nevoeiro ativada.";
 "Fog fix turned off." = "Correção do nevoeiro desativada.";
+"Starting the game" = "A iniciar o jogo";
+"In the menus" = "Nos menus";
+"Driving %@" = "A conduzir %@";
+"Multiplayer (BeamMP)" = "Multijogador (BeamMP)";
 "Restart the launcher to change its language?" = "Reiniciar o launcher para mudar o idioma?";
 "Restart" = "Reiniciar";
 "Later" = "Mais tarde";
@@ -72,7 +76,6 @@
 "Choose…" = "Escolher…";
 "Update" = "Atualizar";
 "Single player" = "Um jogador";
-"Multiplayer (BeamMP)" = "Multijogador (BeamMP)";
 "Update BeamMP" = "Atualizar o BeamMP";
 "Open BeamMP log" = "Abrir registo do BeamMP";
 "BeamMP website" = "Site do BeamMP";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "Atualizar o EarthNG";
 "Remove EarthNG and its maps" = "Remover o EarthNG e os seus mapas";
 "Install" = "Instalar";
+"Show in Discord status" = "Mostrar no estado do Discord";
+"Discord isn't open. Your status appears once it is." = "O Discord não está aberto. O seu estado aparece quando estiver.";
+"Friends see your map and car while you play." = "Os amigos veem o seu mapa e o seu carro enquanto joga.";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "Localidades reais geradas no jogo a partir do OpenStreetMap, sem outra aplicação aberta. Cerca de 280 MB mais um pacote de mapas.";
 "No map pack yet: get Albania or add one from the … menu." = "Ainda sem pacote de mapas: transfira a Albânia ou adicione um no menu ….";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "Mapas: %@. No jogo: Freeroam → EarthNG - Planet.";

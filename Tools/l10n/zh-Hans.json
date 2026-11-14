@@ -151,5 +151,11 @@
  "Disabled": "关闭",
  "USB": "USB",
  "Bluetooth": "蓝牙",
- "Wireless": "无线"
+ "Wireless": "无线",
+ "Starting the game": "正在启动游戏",
+ "In the menus": "在菜单中",
+ "Driving %@": "驾驶 %@",
+ "Show in Discord status": "在 Discord 状态中显示",
+ "Discord isn't open. Your status appears once it is.": "Discord 未打开。打开后会显示你的状态。",
+ "Friends see your map and car while you play.": "好友可以看到你正在玩的地图和车辆。"
 }

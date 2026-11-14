@@ -151,5 +151,11 @@
  "Disabled": "끔",
  "USB": "USB",
  "Bluetooth": "Bluetooth",
- "Wireless": "무선"
+ "Wireless": "무선",
+ "Starting the game": "게임 시작 중",
+ "In the menus": "메뉴 화면",
+ "Driving %@": "%@ 운전 중",
+ "Show in Discord status": "Discord 상태에 표시",
+ "Discord isn't open. Your status appears once it is.": "Discord가 열려 있지 않습니다. 열면 상태가 표시됩니다.",
+ "Friends see your map and car while you play.": "플레이하는 동안 친구에게 맵과 차량이 표시됩니다."
 }

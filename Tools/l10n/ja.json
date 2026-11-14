@@ -151,5 +151,11 @@
  "Disabled": "オフ",
  "USB": "USB",
  "Bluetooth": "Bluetooth",
- "Wireless": "ワイヤレス"
+ "Wireless": "ワイヤレス",
+ "Starting the game": "ゲームを起動中",
+ "In the menus": "メニュー画面",
+ "Driving %@": "%@ を運転中",
+ "Show in Discord status": "Discordのステータスに表示",
+ "Discord isn't open. Your status appears once it is.": "Discordが開いていません。開くとステータスが表示されます。",
+ "Friends see your map and car while you play.": "プレイ中のマップと車がフレンドに表示されます。"
 }

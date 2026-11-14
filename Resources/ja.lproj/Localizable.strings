@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "MODを変更するには、先にゲームを終了してください。";
 "Fog fix turned on." = "霧の修正をオンにしました。";
 "Fog fix turned off." = "霧の修正をオフにしました。";
+"Starting the game" = "ゲームを起動中";
+"In the menus" = "メニュー画面";
+"Driving %@" = "%@ を運転中";
+"Multiplayer (BeamMP)" = "マルチプレイ (BeamMP)";
 "Restart the launcher to change its language?" = "言語を切り替えるためにランチャーを再起動しますか？";
 "Restart" = "再起動";
 "Later" = "後で";
@@ -72,7 +76,6 @@
 "Choose…" = "選択…";
 "Update" = "アップデート";
 "Single player" = "シングルプレイ";
-"Multiplayer (BeamMP)" = "マルチプレイ (BeamMP)";
 "Update BeamMP" = "BeamMPをアップデート";
 "Open BeamMP log" = "BeamMPのログを開く";
 "BeamMP website" = "BeamMPのWebサイト";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "EarthNGをアップデート";
 "Remove EarthNG and its maps" = "EarthNGとマップを削除";
 "Install" = "インストール";
+"Show in Discord status" = "Discordのステータスに表示";
+"Discord isn't open. Your status appears once it is." = "Discordが開いていません。開くとステータスが表示されます。";
+"Friends see your map and car while you play." = "プレイ中のマップと車がフレンドに表示されます。";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "OpenStreetMapをもとにゲーム内で実在の街を生成します。別アプリは不要です。約280 MB＋マップパック。";
 "No map pack yet: get Albania or add one from the … menu." = "マップパックがまだありません：… メニューからアルバニアを入手するか追加してください。";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "マップ：%@。ゲーム内で Freeroam → EarthNG - Planet を選んでください。";

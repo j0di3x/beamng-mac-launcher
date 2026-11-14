@@ -39,6 +39,8 @@ See the [comparison](#gamehub-vs-launcher) below.
   in the same Wine prefix before the game
 - **Real-world maps (experimental):** [BeamNG.Earth](https://github.com/TecnaGamer/BeamNG.Earth) and
   [EarthNG](https://github.com/Alezx311/earthng), see [below](#real-world-maps-experimental)
+- **Discord status:** friends see "Playing BeamNG.drive" with your map, car and play time, like on
+  Windows (see [Discord](#discord-status))
 - **13 languages:** the launcher itself and a game language picker, in every language BeamNG ships:
   English, Deutsch, Español (España), Español (Latinoamérica), Français, 日本語, 한국어, Polski,
   Português (Brasil), Português (Portugal), Русский, 简体中文, 繁體中文
@@ -115,6 +117,15 @@ Pick **Multiplayer (BeamMP)** in the Play box. The first time, the launcher down
 `--no-launch`, waits until it is listening on port 4444, then starts the game as usual. In the game,
 open **Multiplayer** and pick a server. BeamMP keeps itself up to date and is stopped when the game
 closes. Its log is under the **…** menu next to the switch.
+
+## Discord status
+
+BeamNG has Discord Rich Presence built in, but under Wine the game can't reach the Discord app on the
+Mac. The launcher fills in: while the game runs it reads the status line the game writes to its log
+(for example *Playing Freeroam on West Coast Usa with Hirochi Accent*) and sends it to Discord through
+Discord's local connection, under Discord's own BeamNG.drive app, so it shows as **Playing
+BeamNG.drive** with the map, the car and the time played. Nothing is sent anywhere else. Turn it off
+with **Show in Discord status** in the Play box.
 
 ## Real-world maps (experimental)
 

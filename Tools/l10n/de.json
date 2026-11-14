@@ -151,5 +151,11 @@
  "Disabled": "Aus",
  "USB": "USB",
  "Bluetooth": "Bluetooth",
- "Wireless": "Drahtlos"
+ "Wireless": "Drahtlos",
+ "Starting the game": "Spiel startet",
+ "In the menus": "In den Menüs",
+ "Driving %@": "Fährt %@",
+ "Show in Discord status": "Im Discord-Status anzeigen",
+ "Discord isn't open. Your status appears once it is.": "Discord ist nicht geöffnet. Dein Status erscheint, sobald es läuft.",
+ "Friends see your map and car while you play.": "Freunde sehen beim Spielen deine Karte und dein Auto."
 }

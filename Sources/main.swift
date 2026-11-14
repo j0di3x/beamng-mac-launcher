@@ -85,6 +85,7 @@ struct LauncherConfig {
     var gptkVersion = "current"
     var beammp = false
     var earth = false
+    var discord = true
 
     static func load() -> LauncherConfig {
         var c = LauncherConfig()
@@ -105,6 +106,7 @@ struct LauncherConfig {
             case "GPTK_VERSION": c.gptkVersion = val.isEmpty ? "current" : val
             case "BEAMMP": c.beammp = val == "1"
             case "EARTH": c.earth = val == "1"
+            case "DISCORD": c.discord = val != "0"
             default: break
             }
         }
@@ -123,6 +125,7 @@ struct LauncherConfig {
         GPTK_VERSION=\(q(gptkVersion))
         BEAMMP=\(beammp ? 1 : 0)
         EARTH=\(earth ? 1 : 0)
+        DISCORD=\(discord ? 1 : 0)
 
         """
         try? FileManager.default.createDirectory(at: Paths.root, withIntermediateDirectories: true)
@@ -207,6 +210,135 @@ enum Languages {
             UserDefaults.standard.bool(forKey: "launcherLanguageSet") ? code : nil
         } ?? ""
     }
+}
+
+// MARK: - Discord Rich Presence
+
+/// Talks to the Discord app over its local IPC socket ($TMPDIR/discord-ipc-N). The game's own Discord
+/// support can't reach it from inside Wine, so the launcher relays what the game reports in its log.
+final class DiscordPresence {
+    /// Discord's application for BeamNG.drive (its public "detectable games" entry), so friends see
+    /// "Playing BeamNG.drive" with the game's icon.
+    static let clientID = "363413743335374859"
+
+    private let queue = DispatchQueue(label: "discord-ipc")
+    private var fd: Int32 = -1
+    private var lastPayload = ""
+
+    static var discordRunning: Bool {
+        (0..<10).contains { FileManager.default.fileExists(atPath: socketPath($0)) }
+    }
+    private static func socketPath(_ n: Int) -> String {
+        let tmp = ProcessInfo.processInfo.environment["TMPDIR"] ?? NSTemporaryDirectory()
+        return (tmp as NSString).appendingPathComponent("discord-ipc-\(n)")
+    }
+
+    /// details/state: the two text lines; start: when the game started. nil clears the status.
+    func update(details: String?, state: String?, start: Date?) {
+        queue.async { [self] in
+            guard let details else { clearLocked(); return }
+            var activity: [String: Any] = ["details": String(details.prefix(127))]
+            if let state, !state.isEmpty { activity["state"] = String(state.prefix(127)) }
+            if let start { activity["timestamps"] = ["start": Int(start.timeIntervalSince1970)] }
+            let args: [String: Any] = ["pid": Int(getpid()), "activity": activity]
+            let key = "\(details)|\(state ?? "")|\(start?.timeIntervalSince1970 ?? 0)"
+            guard key != lastPayload || fd < 0 else { return }
+            if fd < 0 && !connectLocked() { return }
+            if send(op: 1, ["cmd": "SET_ACTIVITY", "args": args, "nonce": UUID().uuidString]) {
+                lastPayload = key
+            } else {
+                closeLocked()
+            }
+        }
+    }
+
+    func clear() { queue.async { [self] in clearLocked() } }
+
+    private func clearLocked() {
+        if fd >= 0 {
+            _ = send(op: 1, ["cmd": "SET_ACTIVITY", "args": ["pid": Int(getpid())], "nonce": UUID().uuidString])
+        }
+        closeLocked()
+    }
+
+    private func connectLocked() -> Bool {
+        for n in 0..<10 {
+            let path = Self.socketPath(n)
+            guard FileManager.default.fileExists(atPath: path) else { continue }
+            let s = socket(AF_UNIX, SOCK_STREAM, 0)
+            guard s >= 0 else { continue }
+            var tv = timeval(tv_sec: 2, tv_usec: 0)
+            setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &tv, socklen_t(MemoryLayout<timeval>.size))
+            setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, &tv, socklen_t(MemoryLayout<timeval>.size))
+            var one: Int32 = 1
+            setsockopt(s, SOL_SOCKET, SO_NOSIGPIPE, &one, socklen_t(MemoryLayout<Int32>.size))
+            var addr = sockaddr_un()
+            addr.sun_family = sa_family_t(AF_UNIX)
+            withUnsafeMutableBytes(of: &addr.sun_path) { buf in
+                let bytes = Array(path.utf8.prefix(buf.count - 1))
+                buf.copyBytes(from: bytes)
+                buf[bytes.count] = 0
+            }
+            let ok = withUnsafePointer(to: &addr) {
+                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                    Darwin.connect(s, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) == 0
+                }
+            }
+            guard ok else { Darwin.close(s); continue }
+            fd = s
+            if send(op: 0, ["v": 1, "client_id": Self.clientID]) { return true }
+            closeLocked()
+        }
+        return false
+    }
+
+    /// Writes one frame (op, length, JSON) and reads Discord's reply.
+    private func send(op: UInt32, _ payload: [String: Any]) -> Bool {
+        guard fd >= 0, let json = try? JSONSerialization.data(withJSONObject: payload) else { return false }
+        var frame = Data()
+        withUnsafeBytes(of: op.littleEndian) { frame.append(contentsOf: $0) }
+        withUnsafeBytes(of: UInt32(json.count).littleEndian) { frame.append(contentsOf: $0) }
+        frame.append(json)
+        let wrote = frame.withUnsafeBytes { Darwin.write(fd, $0.baseAddress, frame.count) }
+        guard wrote == frame.count else { return false }
+        var header = [UInt8](repeating: 0, count: 8)
+        guard Darwin.read(fd, &header, 8) == 8 else { return false }
+        let replyOp = UInt32(header[0]) | UInt32(header[1]) << 8 | UInt32(header[2]) << 16 | UInt32(header[3]) << 24
+        let len = Int(UInt32(header[4]) | UInt32(header[5]) << 8 | UInt32(header[6]) << 16 | UInt32(header[7]) << 24)
+        var body = [UInt8](repeating: 0, count: max(len, 0))
+        var got = 0
+        while got < len {
+            let n = body.withUnsafeMutableBytes { Darwin.read(fd, $0.baseAddress! + got, len - got) }
+            if n <= 0 { return false }
+            got += n
+        }
+        return replyOp != 2   // 2 = Discord closed the connection (e.g. bad client id)
+    }
+
+    private func closeLocked() {
+        if fd >= 0 { Darwin.close(fd) }
+        fd = -1
+        lastPayload = ""
+    }
+}
+
+/// The game's latest Rich Presence text ("Playing Freeroam on West Coast Usa with Hirochi Accent"),
+/// read from the end of beamng.log when the log was written since `since`.
+func latestRichPresence(since: Date) -> String? {
+    guard let attrs = try? FileManager.default.attributesOfItem(atPath: Paths.gameLog.path),
+          let mod = attrs[.modificationDate] as? Date, mod >= since.addingTimeInterval(-5),
+          let h = try? FileHandle(forReadingFrom: Paths.gameLog) else { return nil }
+    defer { try? h.close() }
+    let size = (try? h.seekToEnd()) ?? 0
+    try? h.seek(toOffset: size > 400_000 ? size - 400_000 : 0)
+    guard let data = try? h.readToEnd(), let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else { return nil }
+    for line in text.split(separator: "\n").reversed() {
+        if let r = line.range(of: "Rich Presence| ") {
+            let msg = line[r.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
+            if !msg.isEmpty { return msg }
+        }
+    }
+    return nil
 }
 
 // MARK: - Controllers
@@ -379,6 +511,11 @@ final class Launcher: ObservableObject {
     @Published var downloadFraction = 0.0
     @Published var downloading = false
     private var downloadTask: URLSessionDownloadTask?
+
+    // Discord Rich Presence
+    @Published var discordRunning = false
+    private let discord = DiscordPresence()
+    private var gameStartedAt: Date?
     private var progressTimer: Timer?
 
     // input
@@ -470,6 +607,7 @@ final class Launcher: ObservableObject {
             loadGraphics(); refreshFogFix(); refreshAddons()
         }
         lastState = state
+        updateDiscord()
         beammpRunning = state != .stopped && processRunning("BeamMP-Launcher.exe")
         earthRunning = state != .stopped && processRunning("BeamNG.Earth.exe")
         if Int(Date().timeIntervalSince1970) % 4 == 0 { refreshDevices() }
@@ -583,6 +721,35 @@ final class Launcher: ObservableObject {
         }
         fogFix = on
         message = on ? L("Fog fix turned on.") : L("Fog fix turned off.")
+    }
+
+    // MARK: Discord
+
+    func updateDiscord() {
+        discordRunning = DiscordPresence.discordRunning
+        guard state != .stopped else {
+            if gameStartedAt != nil { gameStartedAt = nil; discord.clear() }
+            return
+        }
+        if gameStartedAt == nil { gameStartedAt = Date() }
+        guard conf.discord, discordRunning, let start = gameStartedAt else { return }
+        var details = state == .starting ? L("Starting the game") : L("In the menus")
+        var line2 = ""
+        if state == .running, let rp = latestRichPresence(since: start) {
+            if let r = rp.range(of: " with ", options: .backwards) {
+                details = String(rp[..<r.lowerBound])
+                line2 = L("Driving %@", String(rp[r.upperBound...]))
+            } else {
+                details = rp
+            }
+        }
+        if conf.beammp { line2 = line2.isEmpty ? L("Multiplayer (BeamMP)") : line2 + " · BeamMP" }
+        discord.update(details: details, state: line2, start: start)
+    }
+
+    func setDiscord(_ on: Bool) {
+        conf.discord = on; conf.save()
+        if on { updateDiscord() } else { discord.clear() }
     }
 
     // MARK: languages
@@ -1206,6 +1373,16 @@ struct ContentView: View {
                         Button(L("Install")) { m.installEarthNG() }.disabled(m.downloading)
                     }
                 }
+
+                Divider()
+                Toggle(isOn: Binding(get: { m.conf.discord }, set: { m.setDiscord($0) })) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(L("Show in Discord status"))
+                        Caption(m.conf.discord && !m.discordRunning
+                            ? L("Discord isn't open. Your status appears once it is.")
+                            : L("Friends see your map and car while you play."))
+                    }
+                }
             }
             .padding(6).frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -1421,6 +1598,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillFinishLaunching(_ notification: Notification) {
         UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
+    }
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // for README screenshots: BeamNGLauncher -windowHeight 900
+        let h = UserDefaults.standard.double(forKey: "windowHeight")
+        guard h > 0 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            guard let w = NSApp.windows.first(where: { $0.isVisible }) else { return }
+            var f = w.frame; f.origin.y += f.height - h; f.size.height = h
+            w.setFrame(f, display: true)
+        }
     }
 }
 

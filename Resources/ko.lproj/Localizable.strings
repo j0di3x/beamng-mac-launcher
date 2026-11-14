@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "모드를 변경하려면 먼저 게임을 종료하세요.";
 "Fog fix turned on." = "안개 수정을 켰습니다.";
 "Fog fix turned off." = "안개 수정을 껐습니다.";
+"Starting the game" = "게임 시작 중";
+"In the menus" = "메뉴 화면";
+"Driving %@" = "%@ 운전 중";
+"Multiplayer (BeamMP)" = "멀티플레이 (BeamMP)";
 "Restart the launcher to change its language?" = "언어를 바꾸려면 런처를 재시작할까요?";
 "Restart" = "재시작";
 "Later" = "나중에";
@@ -72,7 +76,6 @@
 "Choose…" = "선택…";
 "Update" = "업데이트";
 "Single player" = "싱글플레이";
-"Multiplayer (BeamMP)" = "멀티플레이 (BeamMP)";
 "Update BeamMP" = "BeamMP 업데이트";
 "Open BeamMP log" = "BeamMP 로그 열기";
 "BeamMP website" = "BeamMP 웹사이트";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "EarthNG 업데이트";
 "Remove EarthNG and its maps" = "EarthNG 및 맵 제거";
 "Install" = "설치";
+"Show in Discord status" = "Discord 상태에 표시";
+"Discord isn't open. Your status appears once it is." = "Discord가 열려 있지 않습니다. 열면 상태가 표시됩니다.";
+"Friends see your map and car while you play." = "플레이하는 동안 친구에게 맵과 차량이 표시됩니다.";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "OpenStreetMap으로 게임 안에서 실제 도시를 만듭니다. 별도 앱이 필요 없습니다. 약 280 MB와 맵 팩.";
 "No map pack yet: get Albania or add one from the … menu." = "아직 맵 팩이 없습니다. … 메뉴에서 알바니아를 받거나 추가하세요.";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "맵: %@. 게임에서: Freeroam → EarthNG - Planet.";

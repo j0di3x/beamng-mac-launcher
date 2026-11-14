@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "Beende zuerst das Spiel, um Mods zu ändern.";
 "Fog fix turned on." = "Nebel-Fix eingeschaltet.";
 "Fog fix turned off." = "Nebel-Fix ausgeschaltet.";
+"Starting the game" = "Spiel startet";
+"In the menus" = "In den Menüs";
+"Driving %@" = "Fährt %@";
+"Multiplayer (BeamMP)" = "Mehrspieler (BeamMP)";
 "Restart the launcher to change its language?" = "Launcher neu starten, um die Sprache zu wechseln?";
 "Restart" = "Neu starten";
 "Later" = "Später";
@@ -72,7 +76,6 @@
 "Choose…" = "Wählen …";
 "Update" = "Aktualisieren";
 "Single player" = "Einzelspieler";
-"Multiplayer (BeamMP)" = "Mehrspieler (BeamMP)";
 "Update BeamMP" = "BeamMP aktualisieren";
 "Open BeamMP log" = "BeamMP-Protokoll öffnen";
 "BeamMP website" = "BeamMP-Website";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "EarthNG aktualisieren";
 "Remove EarthNG and its maps" = "EarthNG und seine Karten entfernen";
 "Install" = "Installieren";
+"Show in Discord status" = "Im Discord-Status anzeigen";
+"Discord isn't open. Your status appears once it is." = "Discord ist nicht geöffnet. Dein Status erscheint, sobald es läuft.";
+"Friends see your map and car while you play." = "Freunde sehen beim Spielen deine Karte und dein Auto.";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "Echte Orte, im Spiel aus OpenStreetMap gebaut, ohne zusätzliche App. Ca. 280 MB plus ein Kartenpaket.";
 "No map pack yet: get Albania or add one from the … menu." = "Noch kein Kartenpaket: Lade Albanien oder füge eins über das …-Menü hinzu.";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "Karten: %@. Im Spiel: Freeroam → EarthNG - Planet.";

@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "请先退出游戏再更改模组。";
 "Fog fix turned on." = "已开启雾效修复。";
 "Fog fix turned off." = "已关闭雾效修复。";
+"Starting the game" = "正在启动游戏";
+"In the menus" = "在菜单中";
+"Driving %@" = "驾驶 %@";
+"Multiplayer (BeamMP)" = "多人游戏 (BeamMP)";
 "Restart the launcher to change its language?" = "要重启启动器以切换语言吗？";
 "Restart" = "重启";
 "Later" = "稍后";
@@ -72,7 +76,6 @@
 "Choose…" = "选择…";
 "Update" = "更新";
 "Single player" = "单人游戏";
-"Multiplayer (BeamMP)" = "多人游戏 (BeamMP)";
 "Update BeamMP" = "更新 BeamMP";
 "Open BeamMP log" = "打开 BeamMP 日志";
 "BeamMP website" = "BeamMP 网站";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "更新 EarthNG";
 "Remove EarthNG and its maps" = "移除 EarthNG 及其地图";
 "Install" = "安装";
+"Show in Discord status" = "在 Discord 状态中显示";
+"Discord isn't open. Your status appears once it is." = "Discord 未打开。打开后会显示你的状态。";
+"Friends see your map and car while you play." = "好友可以看到你正在玩的地图和车辆。";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "在游戏内根据 OpenStreetMap 生成真实城镇，无需额外应用。约 280 MB，另需一个地图包。";
 "No map pack yet: get Albania or add one from the … menu." = "还没有地图包：从 … 菜单下载阿尔巴尼亚或添加地图包。";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "地图：%@。在游戏中选择 Freeroam → EarthNG - Planet。";

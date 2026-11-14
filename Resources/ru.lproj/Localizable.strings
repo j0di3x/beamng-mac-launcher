@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "Чтобы изменить моды, сначала закройте игру.";
 "Fog fix turned on." = "Исправление тумана включено.";
 "Fog fix turned off." = "Исправление тумана выключено.";
+"Starting the game" = "Запуск игры";
+"In the menus" = "В меню";
+"Driving %@" = "За рулём: %@";
+"Multiplayer (BeamMP)" = "Мультиплеер (BeamMP)";
 "Restart the launcher to change its language?" = "Перезапустить лаунчер, чтобы сменить язык?";
 "Restart" = "Перезапустить";
 "Later" = "Позже";
@@ -72,7 +76,6 @@
 "Choose…" = "Выбрать…";
 "Update" = "Обновить";
 "Single player" = "Одиночная";
-"Multiplayer (BeamMP)" = "Мультиплеер (BeamMP)";
 "Update BeamMP" = "Обновить BeamMP";
 "Open BeamMP log" = "Открыть журнал BeamMP";
 "BeamMP website" = "Сайт BeamMP";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "Обновить EarthNG";
 "Remove EarthNG and its maps" = "Удалить EarthNG и его карты";
 "Install" = "Установить";
+"Show in Discord status" = "Показывать в статусе Discord";
+"Discord isn't open. Your status appears once it is." = "Discord не открыт. Статус появится, когда вы его запустите.";
+"Friends see your map and car while you play." = "Друзья видят вашу карту и машину во время игры.";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "Настоящие города, которые строятся в игре из OpenStreetMap, без отдельного приложения. Около 280 МБ плюс пакет карт.";
 "No map pack yet: get Albania or add one from the … menu." = "Пакета карт пока нет: загрузите Албанию или добавьте свой через меню ….";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "Карты: %@. В игре: Freeroam → EarthNG - Planet.";

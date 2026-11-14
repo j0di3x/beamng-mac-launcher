@@ -151,5 +151,11 @@
  "Disabled": "Desativado",
  "USB": "USB",
  "Bluetooth": "Bluetooth",
- "Wireless": "Sem fios"
+ "Wireless": "Sem fios",
+ "Starting the game": "A iniciar o jogo",
+ "In the menus": "Nos menus",
+ "Driving %@": "A conduzir %@",
+ "Show in Discord status": "Mostrar no estado do Discord",
+ "Discord isn't open. Your status appears once it is.": "O Discord não está aberto. O seu estado aparece quando estiver.",
+ "Friends see your map and car while you play.": "Os amigos veem o seu mapa e o seu carro enquanto joga."
 }

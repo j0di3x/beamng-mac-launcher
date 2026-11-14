@@ -8,6 +8,10 @@
 "Quit the game first to change mods." = "Quit the game first to change mods.";
 "Fog fix turned on." = "Fog fix turned on.";
 "Fog fix turned off." = "Fog fix turned off.";
+"Starting the game" = "Starting the game";
+"In the menus" = "In the menus";
+"Driving %@" = "Driving %@";
+"Multiplayer (BeamMP)" = "Multiplayer (BeamMP)";
 "Restart the launcher to change its language?" = "Restart the launcher to change its language?";
 "Restart" = "Restart";
 "Later" = "Later";
@@ -72,7 +76,6 @@
 "Choose…" = "Choose…";
 "Update" = "Update";
 "Single player" = "Single player";
-"Multiplayer (BeamMP)" = "Multiplayer (BeamMP)";
 "Update BeamMP" = "Update BeamMP";
 "Open BeamMP log" = "Open BeamMP log";
 "BeamMP website" = "BeamMP website";
@@ -93,6 +96,9 @@
 "Update EarthNG" = "Update EarthNG";
 "Remove EarthNG and its maps" = "Remove EarthNG and its maps";
 "Install" = "Install";
+"Show in Discord status" = "Show in Discord status";
+"Discord isn't open. Your status appears once it is." = "Discord isn't open. Your status appears once it is.";
+"Friends see your map and car while you play." = "Friends see your map and car while you play.";
 "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack." = "Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack.";
 "No map pack yet: get Albania or add one from the … menu." = "No map pack yet: get Albania or add one from the … menu.";
 "Maps: %@. In the game: Freeroam → EarthNG - Planet." = "Maps: %@. In the game: Freeroam → EarthNG - Planet.";
