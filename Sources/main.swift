@@ -498,6 +498,7 @@ final class Launcher: ObservableObject {
     @Published var shadows = "Normal"
     @Published var meshes = "Normal"
     @Published var windowRes = "1280 720"
+    @Published var displayMode = "Window"
     @Published var pendingChanges: [String: Any] = [:]
     @Published var fogFix = false
     @Published var gameLanguage = ""
@@ -662,6 +663,7 @@ final class Launcher: ObservableObject {
         shadows = "\(v("GraphicShadowsQuality") ?? "Normal")"
         meshes = "\(v("GraphicMeshQuality") ?? "Normal")"
         windowRes = "\(v("GraphicDisplayResolutions") ?? "1280 720")"
+        displayMode = "\(v("GraphicDisplayModes") ?? "Window")"
         gameLanguage = s["userLanguage"] as? String ?? ""
     }
 
@@ -712,6 +714,42 @@ final class Launcher: ObservableObject {
         aaType = type
         change(type == "off" ? ["GraphicAntialiasType": "off", "GraphicAntialias": 0]
                              : ["GraphicAntialiasType": type, "GraphicAntialias": 4])
+    }
+
+    /// The main screen's size in pixels (what full screen modes render at).
+    var screenPixels: (Int, Int) {
+        guard let sc = NSScreen.main else { return (1920, 1080) }
+        return (Int(sc.frame.width * sc.backingScaleFactor), Int(sc.frame.height * sc.backingScaleFactor))
+    }
+
+    func setDisplayMode(_ mode: String) {
+        if mode == "Window" {
+            var res = windowRes
+            if displayMode != "Window", let f = NSScreen.main?.visibleFrame { res = "\(Int(f.width)) \(Int(f.height) - 28)" }
+            displayMode = mode; windowRes = res
+            change(["GraphicDisplayModes": "Window", "GraphicDisplayResolutions": res])
+        } else {
+            let (w, h) = screenPixels
+            displayMode = mode; windowRes = "\(w) \(h)"
+            change(["GraphicDisplayModes": mode, "GraphicDisplayResolutions": "\(w) \(h)"])
+        }
+    }
+
+    /// Render scale needs FSR 3 (it renders smaller and scales up), so turn it on if needed.
+    func setRenderScale(_ value: Double) {
+        let v = (value * 100).rounded() / 100
+        renderScale = v
+        var c: [String: Any] = ["GraphicUpscalingQuality": v]
+        if aaType != "fsr3" { aaType = "fsr3"; c["GraphicAntialiasType"] = "fsr3"; c["GraphicAntialias"] = 4 }
+        change(c)
+    }
+
+    /// e.g. "840 × 525" for 50 % of a 1680 × 1050 screen.
+    var renderResolution: String {
+        let parts = windowRes.split(separator: " ").compactMap { Double($0) }
+        guard parts.count == 2 else { return "" }
+        let s = aaType == "fsr3" ? renderScale : 1
+        return "\(Int((parts[0] * s).rounded())) × \(Int((parts[1] * s).rounded()))"
     }
 
     func setWindow(_ res: String) {
@@ -1467,11 +1505,33 @@ struct ContentView: View {
                     Caption(L("Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best."))
                 }
                 if showAdvanced { advancedGraphics }
-                LabeledContent(L("Window size")) {
-                    Picker("", selection: Binding(get: { m.windowRes }, set: { m.setWindow($0) })) {
-                        ForEach(m.windowChoices, id: \.0) { Text($0.1).tag($0.0) }
+                LabeledContent(L("Display")) {
+                    Picker("", selection: Binding(get: { m.displayMode }, set: { m.setDisplayMode($0) })) {
+                        Text(L("Window")).tag("Window")
+                        Text(L("Full screen (borderless)")).tag("Borderless")
+                        Text(L("Full screen (exclusive)")).tag("Fullscreen")
                     }.labelsHidden().frame(width: 220)
                 }
+                if m.displayMode == "Window" {
+                    LabeledContent(L("Window size")) {
+                        Picker("", selection: Binding(get: { m.windowRes }, set: { m.setWindow($0) })) {
+                            ForEach(m.windowChoices, id: \.0) { Text($0.1).tag($0.0) }
+                        }.labelsHidden().frame(width: 220)
+                    }
+                } else {
+                    Caption(L("Full screen covers the Dock and menu bar while you play."))
+                }
+                LabeledContent(L("Resolution scale")) {
+                    HStack {
+                        Slider(value: $m.renderScale, in: 0.5...1.0, step: 0.05) { editing in
+                            if !editing { m.setRenderScale(m.renderScale) }
+                        }
+                        Text("\(Int((m.renderScale * 100).rounded()))%").monospacedDigit().frame(width: 40, alignment: .trailing)
+                    }
+                }
+                Caption(m.renderScale < 0.99 || m.aaType == "fsr3"
+                    ? L("Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.", m.renderResolution)
+                    : L("Lower it to render fewer pixels and get more FPS."))
                 Toggle(L("Show FPS counter"), isOn: Binding(get: { m.conf.fpsHUD }, set: {
                     m.conf.fpsHUD = $0; m.conf.save()
                     m.message = $0 ? L("FPS counter on from the next start.") : L("FPS counter off from the next start.")
@@ -1490,15 +1550,6 @@ struct ContentView: View {
             }
             .labelsHidden().frame(width: 180)
         }
-        LabeledContent(L("Render scale")) {
-            HStack {
-                Slider(value: $m.renderScale, in: 0.5...1.0, step: 0.05) { editing in
-                    if !editing { m.change(["GraphicUpscalingQuality": (m.renderScale * 100).rounded() / 100]) }
-                }
-                Text("\(Int((m.renderScale * 100).rounded()))%").monospacedDigit().frame(width: 44, alignment: .trailing)
-            }
-        }
-        .disabled(m.aaType != "fsr3")
         LabeledContent(L("Sharpness")) {
             HStack {
                 Slider(value: $m.sharpness, in: 0...1, step: 0.05) { editing in
@@ -1509,7 +1560,7 @@ struct ContentView: View {
         }
         .disabled(m.aaType != "fsr3")
         if m.aaType != "fsr3" {
-            Caption(L("Render scale and sharpness work with FSR 3."))
+            Caption(L("Sharpness works with FSR 3."))
         }
         HStack(spacing: 16) {
             LabeledContent(L("Shadows")) {

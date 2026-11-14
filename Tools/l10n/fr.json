@@ -106,9 +106,7 @@
  "Anti-aliasing": "Anticrénelage",
  "Off": "Désactivé",
  "FSR 3 (best)": "FSR 3 (le meilleur)",
- "Render scale": "Échelle de rendu",
  "Sharpness": "Netteté",
- "Render scale and sharpness work with FSR 3.": "L’échelle de rendu et la netteté fonctionnent avec FSR 3.",
  "Shadows": "Ombres",
  "Meshes": "Modèles",
  "Language": "Langue",
@@ -160,5 +158,14 @@
  "Friends see your map and car while you play.": "Vos amis voient votre carte et votre voiture pendant que vous jouez.",
  "Potato": "Patate",
  "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "Patate : sous Minimal. Demi-résolution, limite à 30 IPS, tous les effets désactivés et aucune voiture garée. Pour les Mac anciens ou avec 8 Go. Les petites cartes comme Gridmap ou Small Island tournent le mieux.",
- "Potato mode (below Lowest)": "Mode patate (sous Minimal)"
+ "Potato mode (below Lowest)": "Mode patate (sous Minimal)",
+ "Display": "Affichage",
+ "Window": "Fenêtre",
+ "Full screen (borderless)": "Plein écran (sans bordure)",
+ "Full screen (exclusive)": "Plein écran (exclusif)",
+ "Full screen covers the Dock and menu bar while you play.": "Le plein écran masque le Dock et la barre des menus pendant que vous jouez.",
+ "Resolution scale": "Échelle de résolution",
+ "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "Rendu en %@, agrandi avec FSR 3. Plus bas est plus rapide mais plus flou.",
+ "Lower it to render fewer pixels and get more FPS.": "Baissez-la pour calculer moins de pixels et gagner des IPS.",
+ "Sharpness works with FSR 3.": "La netteté fonctionne avec FSR 3."
 }

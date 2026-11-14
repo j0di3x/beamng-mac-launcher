@@ -106,9 +106,7 @@
  "Anti-aliasing": "안티에일리어싱",
  "Off": "끔",
  "FSR 3 (best)": "FSR 3 (최상)",
- "Render scale": "렌더 배율",
  "Sharpness": "선명도",
- "Render scale and sharpness work with FSR 3.": "렌더 배율과 선명도는 FSR 3에서 작동합니다.",
  "Shadows": "그림자",
  "Meshes": "메시",
  "Language": "언어",
@@ -160,5 +158,14 @@
  "Friends see your map and car while you play.": "플레이하는 동안 친구에게 맵과 차량이 표시됩니다.",
  "Potato": "감자",
  "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "감자: 최저보다 낮은 설정입니다. 절반 해상도, 30 FPS 제한, 모든 효과 끔, 주차 차량 없음. 오래된 Mac이나 8 GB Mac용. Gridmap이나 Small Island 같은 작은 맵이 가장 잘 돌아갑니다.",
- "Potato mode (below Lowest)": "감자 모드 (최저보다 낮음)"
+ "Potato mode (below Lowest)": "감자 모드 (최저보다 낮음)",
+ "Display": "디스플레이",
+ "Window": "창",
+ "Full screen (borderless)": "전체 화면 (테두리 없음)",
+ "Full screen (exclusive)": "전체 화면 (전용)",
+ "Full screen covers the Dock and menu bar while you play.": "전체 화면에서는 플레이하는 동안 Dock과 메뉴 막대가 가려집니다.",
+ "Resolution scale": "해상도 배율",
+ "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "%@로 렌더링한 뒤 FSR 3로 확대합니다. 낮을수록 빠르지만 흐려집니다.",
+ "Lower it to render fewer pixels and get more FPS.": "낮추면 렌더링하는 픽셀이 줄어 FPS가 오릅니다.",
+ "Sharpness works with FSR 3.": "선명도는 FSR 3에서 작동합니다."
 }

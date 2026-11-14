@@ -110,8 +110,6 @@
  "Remove BeamNG.Earth": "移除 BeamNG.Earth",
  "Remove EarthNG and its maps": "移除 EarthNG 及其地圖",
  "Removed (moved to the Trash).": "已移除（移到垃圾桶）。",
- "Render scale": "算繪比例",
- "Render scale and sharpness work with FSR 3.": "算繪比例和銳度需配合 FSR 3 使用。",
  "Reset": "恢復",
  "Reset to defaults": "恢復預設",
  "Reset to recommended settings?": "恢復推薦設定？",
@@ -160,5 +158,14 @@
  "Friends see your map and car while you play.": "好友可以看到你正在玩的地圖和車輛。",
  "Potato": "馬鈴薯",
  "Potato: below Lowest. Half resolution, 30 FPS cap, every effect off and no parked cars. For older or 8 GB Macs. Small maps like Gridmap or Small Island run best.": "馬鈴薯：比最低還低。一半解析度、30 FPS 上限、關閉所有特效、沒有停放車輛。適合舊款或 8 GB 記憶體的 Mac。Gridmap、Small Island 等小地圖執行最順暢。",
- "Potato mode (below Lowest)": "馬鈴薯模式（低於最低）"
+ "Potato mode (below Lowest)": "馬鈴薯模式（低於最低）",
+ "Display": "顯示",
+ "Window": "視窗",
+ "Full screen (borderless)": "全螢幕（無邊框）",
+ "Full screen (exclusive)": "全螢幕（獨佔）",
+ "Full screen covers the Dock and menu bar while you play.": "全螢幕時會遮住 Dock 和選單列。",
+ "Resolution scale": "解析度縮放",
+ "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "以 %@ 算繪，再用 FSR 3 放大。越低越流暢，但越模糊。",
+ "Lower it to render fewer pixels and get more FPS.": "調低可減少算繪像素，提高 FPS。",
+ "Sharpness works with FSR 3.": "銳度需配合 FSR 3 使用。"
 }
