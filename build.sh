@@ -1,0 +1,27 @@
+#!/bin/zsh
+# Builds "BeamNG Launcher.app" into ./build.  Pass --install to copy it to ~/Applications.
+set -e
+cd "${0:A:h}"
+# Build and sign outside the repo: folders like Documents (iCloud) add extended attributes that codesign rejects.
+WORK=$(mktemp -d)
+APP="$WORK/BeamNG Launcher.app"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+swiftc -parse-as-library -swift-version 5 -O -target arm64-apple-macos14 \
+  -framework SwiftUI -framework AppKit -framework IOKit -framework GameController \
+  Sources/main.swift -o "$APP/Contents/MacOS/BeamNGLauncher"
+ditto --norsrc --noextattr Resources/Info.plist "$APP/Contents/Info.plist"
+ditto --norsrc --noextattr Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+ditto --norsrc --noextattr Resources/scripts "$APP/Contents/Resources/scripts"
+ditto --norsrc --noextattr Resources/noFogFix "$APP/Contents/Resources/noFogFix"
+chmod +x "$APP/Contents/Resources/scripts/"*.sh
+xattr -cr "$APP"
+codesign --force --deep -s - "$APP"
+rm -rf build; mkdir -p build; ditto "$APP" "build/BeamNG Launcher.app"
+echo "Built build/BeamNG Launcher.app"
+if [ "$1" = "--install" ]; then
+  mkdir -p "$HOME/Applications"
+  rm -rf "$HOME/Applications/BeamNG Launcher.app"
+  ditto "$APP" "$HOME/Applications/BeamNG Launcher.app"
+  echo "Installed to ~/Applications/BeamNG Launcher.app"
+fi
+rm -rf "$WORK"
