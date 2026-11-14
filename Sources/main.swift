@@ -332,11 +332,15 @@ func latestRichPresence(since: Date) -> String? {
     let size = (try? h.seekToEnd()) ?? 0
     try? h.seek(toOffset: size > 400_000 ? size - 400_000 : 0)
     guard let data = try? h.readToEnd(), let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else { return nil }
-    for line in text.split(separator: "\n").reversed() {
-        if let r = line.range(of: "Rich Presence| ") {
-            let msg = line[r.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
-            if !msg.isEmpty { return msg }
-        }
+    // The log has Windows line endings ("\r\n" is one Character in Swift, so split on isNewline).
+    // Only the debug lines util_richPresence writes with the status text count; its info lines
+    // ("Setting activity to …") and the startup line ("Rich Presence is enabled…") don't.
+    let marker = "|D|GELua.util_richPresence.Rich Presence| "
+    for line in text.split(whereSeparator: \.isNewline).reversed() {
+        guard let r = line.range(of: marker) else { continue }
+        let msg = line[r.upperBound...].trimmingCharacters(in: .whitespaces)
+        if msg.isEmpty || msg.hasPrefix("Rich Presence") || msg.contains("|") { continue }
+        return msg == "Playing" ? nil : msg     // plain "Playing" is the main menu
     }
     return nil
 }
@@ -458,7 +462,7 @@ enum ControllerScanner {
     static func seenByGame() -> [String] {
         guard let text = try? String(contentsOf: Paths.gameLog, encoding: .utf8) else { return [] }
         var names: [String] = []
-        for line in text.split(separator: "\n") where line.contains("Device connected:") {
+        for line in text.split(whereSeparator: \.isNewline) where line.contains("Device connected:") {
             if let r = line.range(of: "Device connected: ") {
                 let rest = line[r.upperBound...]
                 let name = rest.components(separatedBy: " (").first ?? String(rest)
