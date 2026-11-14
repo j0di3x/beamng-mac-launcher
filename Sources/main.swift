@@ -5,6 +5,17 @@ import AppKit
 import IOKit
 import IOKit.hid
 import GameController
+import CryptoKit
+
+/// Looks a launcher string up in the bundle's Localizable.strings (English text is the key).
+func L(_ key: String) -> String { Bundle.main.localizedString(forKey: key, value: key, table: nil) }
+func L(_ key: String, _ args: CVarArg...) -> String { String(format: L(key), arguments: args) }
+
+struct LauncherError: LocalizedError {
+    let text: String
+    init(_ t: String) { text = t }
+    var errorDescription: String? { text }
+}
 
 // MARK: - Paths
 
@@ -21,6 +32,14 @@ enum Paths {
     static let gameLog = userRoot.appendingPathComponent("beamng.log")
     static let mods = userRoot.appendingPathComponent("mods")
     static let launchLog = root.appendingPathComponent("logs/last-launch.log")
+    static let logs = root.appendingPathComponent("logs")
+    static let addons = root.appendingPathComponent("addons")
+    static let addonVersions = addons.appendingPathComponent("versions.json")
+    static let beammpExe = addons.appendingPathComponent("beammp/BeamMP-Launcher.exe")
+    static let earthExe = addons.appendingPathComponent("beamng-earth/BeamNG.Earth.exe")
+    static let earthMod = mods.appendingPathComponent("unpacked/beamng_earth")
+    static let earthngPlanet = mods.appendingPathComponent("earthng_planet.zip")
+    static let beamngIni = prefix.appendingPathComponent("drive_c/users/steamuser/AppData/Local/BeamNG/BeamNG.drive.ini")
     static var userCache: URL {
         var buf = [CChar](repeating: 0, count: 1024)
         confstr(_CS_DARWIN_USER_CACHE_DIR, &buf, buf.count)
@@ -64,6 +83,8 @@ struct LauncherConfig {
     var metal4 = true
     var fpsHUD = false
     var gptkVersion = "current"
+    var beammp = false
+    var earth = false
 
     static func load() -> LauncherConfig {
         var c = LauncherConfig()
@@ -82,6 +103,8 @@ struct LauncherConfig {
             case "METAL4": c.metal4 = val == "1"
             case "FPS_HUD": c.fpsHUD = val == "1"
             case "GPTK_VERSION": c.gptkVersion = val.isEmpty ? "current" : val
+            case "BEAMMP": c.beammp = val == "1"
+            case "EARTH": c.earth = val == "1"
             default: break
             }
         }
@@ -98,6 +121,8 @@ struct LauncherConfig {
         METAL4=\(metal4 ? 1 : 0)
         FPS_HUD=\(fpsHUD ? 1 : 0)
         GPTK_VERSION=\(q(gptkVersion))
+        BEAMMP=\(beammp ? 1 : 0)
+        EARTH=\(earth ? 1 : 0)
 
         """
         try? FileManager.default.createDirectory(at: Paths.root, withIntermediateDirectories: true)
@@ -151,6 +176,39 @@ func gamePresets(gameDir: String) -> [String: [String: Any]] {
     return obj
 }
 
+// MARK: - Languages
+
+enum Languages {
+    /// Native names of BeamNG's official languages (folder names in the game's locales/translations).
+    static let names: [String: String] = [
+        "en-US": "English", "de_DE": "Deutsch", "es_ES": "Español (España)", "es_419": "Español (Latinoamérica)",
+        "fr_FR": "Français", "ja_JP": "日本語", "ko_KR": "한국어", "pl_PL": "Polski",
+        "pt_BR": "Português (Brasil)", "pt_PT": "Português (Portugal)", "ru_RU": "Русский",
+        "zh_Hans": "简体中文", "zh_Hant": "繁體中文",
+    ]
+    /// The launcher's own translations (.lproj) for each game language.
+    static let launcherCode: [String: String] = [
+        "en-US": "en", "de_DE": "de", "es_ES": "es", "es_419": "es-419", "fr_FR": "fr", "ja_JP": "ja", "ko_KR": "ko",
+        "pl_PL": "pl", "pt_BR": "pt-BR", "pt_PT": "pt-PT", "ru_RU": "ru", "zh_Hans": "zh-Hans", "zh_Hant": "zh-Hant",
+    ]
+
+    /// Every language the installed game ships (falls back to the known list).
+    static func game(gameDir: String) -> [String] {
+        let dir = URL(fileURLWithPath: gameDir).appendingPathComponent("locales/translations")
+        let found = ((try? FileManager.default.contentsOfDirectory(atPath: dir.path)) ?? [])
+            .filter { !$0.hasPrefix(".") }
+        let list = found.isEmpty ? Array(names.keys) : found
+        return list.sorted { name($0).localizedCompare(name($1)) == .orderedAscending }
+    }
+    static func name(_ key: String) -> String { names[key] ?? key }
+
+    static var launcherOverride: String {
+        (UserDefaults.standard.array(forKey: "AppleLanguages") as? [String])?.first.flatMap { code in
+            UserDefaults.standard.bool(forKey: "launcherLanguageSet") ? code : nil
+        } ?? ""
+    }
+}
+
 // MARK: - Controllers
 
 struct InputDevice: Identifiable, Hashable {
@@ -186,7 +244,7 @@ enum ControllerScanner {
         let key = String(format: "%04x:%04x", vendor, product)
         var base = knownNames[key] ?? raw
         let looksLikeCode = base.isEmpty || base.range(of: "^[0-9A-Fa-f]{5,}$", options: .regularExpression) != nil
-        if looksLikeCode { base = "Game controller" }
+        if looksLikeCode { base = L("Game controller") }
         if !manufacturer.isEmpty && !base.lowercased().contains(manufacturer.lowercased()) && knownNames[key] != nil || looksLikeCode && !manufacturer.isEmpty {
             base += " (\(manufacturer))"
         }
@@ -306,6 +364,22 @@ final class Launcher: ObservableObject {
     @Published var windowRes = "1280 720"
     @Published var pendingChanges: [String: Any] = [:]
     @Published var fogFix = false
+    @Published var gameLanguage = ""
+
+    // add-ons: BeamMP, BeamNG.Earth, EarthNG
+    @Published var beammpInstalled = false
+    @Published var earthInstalled = false
+    @Published var earthngInstalled = false
+    @Published var earthngPacks: [String] = []
+    @Published var addonVersions: [String: String] = [:]
+    @Published var updates: Set<String> = []
+    @Published var beammpRunning = false
+    @Published var earthRunning = false
+    @Published var downloadTitle = ""
+    @Published var downloadFraction = 0.0
+    @Published var downloading = false
+    private var downloadTask: URLSessionDownloadTask?
+    private var progressTimer: Timer?
 
     // input
     @Published var devices: [InputDevice] = []
@@ -327,6 +401,7 @@ final class Launcher: ObservableObject {
         if conf.gameDir.isEmpty, let found = Launcher.findGameDir() { conf.gameDir = found; conf.save() }
         refreshAll()
         tick()
+        Task { await checkAddonUpdates() }
         timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick() }
         }
@@ -370,6 +445,7 @@ final class Launcher: ObservableObject {
         loadGraphics()
         refreshDevices()
         refreshFogFix()
+        refreshAddons()
     }
 
     func refreshSetup() {
@@ -390,10 +466,12 @@ final class Launcher: ObservableObject {
         state = running ? .running : (starting ? .starting : .stopped)
         if lastState != .stopped && state == .stopped {
             // game just closed: it rewrote settings.json, so apply anything queued and reload
-            if !pendingChanges.isEmpty { GameSettingsFile.merge(pendingChanges); pendingChanges = [:]; message = "Saved your queued graphics changes." }
-            loadGraphics(); refreshFogFix()
+            if !pendingChanges.isEmpty { GameSettingsFile.merge(pendingChanges); pendingChanges = [:]; message = L("Saved your queued changes.") }
+            loadGraphics(); refreshFogFix(); refreshAddons()
         }
         lastState = state
+        beammpRunning = state != .stopped && processRunning("BeamMP-Launcher.exe")
+        earthRunning = state != .stopped && processRunning("BeamNG.Earth.exe")
         if Int(Date().timeIntervalSince1970) % 4 == 0 { refreshDevices() }
     }
 
@@ -415,16 +493,17 @@ final class Launcher: ObservableObject {
         shadows = "\(v("GraphicShadowsQuality") ?? "Normal")"
         meshes = "\(v("GraphicMeshQuality") ?? "Normal")"
         windowRes = "\(v("GraphicDisplayResolutions") ?? "1280 720")"
+        gameLanguage = s["userLanguage"] as? String ?? ""
     }
 
     /// Writes now if the game is closed, otherwise queues until it exits.
     func change(_ values: [String: Any]) {
         if state == .stopped {
             GameSettingsFile.merge(values)
-            message = "Saved. Takes effect next time the game starts."
+            message = L("Saved. Takes effect next time the game starts.")
         } else {
             for (k, v) in values { pendingChanges[k] = v }
-            message = "The game is running — changes apply when it restarts."
+            message = L("The game is running — changes apply when it restarts.")
         }
     }
 
@@ -461,7 +540,7 @@ final class Launcher: ObservableObject {
         var list = [("1280 720", "1280 × 720"), ("1600 900", "1600 × 900"), ("1920 1080", "1920 × 1080")]
         if let f = NSScreen.main?.visibleFrame {
             let w = Int(f.width), h = Int(f.height) - 28
-            list.insert(("\(w) \(h)", "Fit screen (\(w) × \(h))"), at: 0)
+            list.insert(("\(w) \(h)", L("Fit screen (%ld × %ld)", w, h)), at: 0)
         }
         if !list.contains(where: { $0.0 == windowRes }) {
             list.append((windowRes, windowRes.replacingOccurrences(of: " ", with: " × ")))
@@ -483,7 +562,7 @@ final class Launcher: ObservableObject {
     }
 
     func setFogFix(_ on: Bool) {
-        guard state == .stopped else { message = "Quit the game first to change mods."; refreshFogFix(); return }
+        guard state == .stopped else { message = L("Quit the game first to change mods."); refreshFogFix(); return }
         let fm = FileManager.default
         let db = Paths.mods.appendingPathComponent("db.json")
         var obj = (try? Data(contentsOf: db)).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] } ?? [:]
@@ -503,28 +582,298 @@ final class Launcher: ObservableObject {
             if let d = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]) { try? d.write(to: db) }
         }
         fogFix = on
-        message = on ? "Fog fix turned on." : "Fog fix turned off."
+        message = on ? L("Fog fix turned on.") : L("Fog fix turned off.")
+    }
+
+    // MARK: languages
+
+    var gameLanguages: [String] { Languages.game(gameDir: conf.gameDir) }
+
+    func setGameLanguage(_ key: String) {
+        gameLanguage = key
+        change(["userLanguage": key])
+    }
+
+    /// "" follows macOS. The launcher has to restart to switch.
+    func setLauncherLanguage(_ code: String) {
+        let d = UserDefaults.standard
+        if code.isEmpty { d.removeObject(forKey: "AppleLanguages"); d.set(false, forKey: "launcherLanguageSet") }
+        else { d.set([code], forKey: "AppleLanguages"); d.set(true, forKey: "launcherLanguageSet") }
+        d.synchronize()
+        let a = NSAlert()
+        a.messageText = L("Restart the launcher to change its language?")
+        a.addButton(withTitle: L("Restart")); a.addButton(withTitle: L("Later"))
+        if a.runModal() == .alertFirstButtonReturn { relaunch() }
+    }
+
+    func relaunch() {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/sh")
+        p.arguments = ["-c", "sleep 1; /usr/bin/open \"$0\"", Bundle.main.bundlePath]
+        try? p.run()
+        NSApp.terminate(nil)
+    }
+
+    // MARK: add-ons (BeamMP, BeamNG.Earth, EarthNG)
+
+    func refreshAddons() {
+        let fm = FileManager.default
+        beammpInstalled = fm.fileExists(atPath: Paths.beammpExe.path)
+        earthInstalled = fm.fileExists(atPath: Paths.earthExe.path)
+        earthngInstalled = fm.fileExists(atPath: Paths.earthngPlanet.path)
+        earthngPacks = ((try? fm.contentsOfDirectory(atPath: Paths.mods.path)) ?? [])
+            .filter { $0.hasPrefix("earthng_") && $0.hasSuffix(".zip") && $0 != "earthng_planet.zip" }
+            .map { String($0.dropFirst(8).dropLast(4)).replacingOccurrences(of: "_", with: " ").capitalized }
+            .sorted()
+        if let d = try? Data(contentsOf: Paths.addonVersions),
+           let o = try? JSONSerialization.jsonObject(with: d) as? [String: String] { addonVersions = o }
+        if conf.beammp && !beammpInstalled { conf.beammp = false; conf.save() }
+        if conf.earth && !earthInstalled { conf.earth = false; conf.save() }
+    }
+
+    private func saveVersion(_ addon: String, _ v: String?) {
+        addonVersions[addon] = v
+        try? FileManager.default.createDirectory(at: Paths.addons, withIntermediateDirectories: true)
+        if let d = try? JSONSerialization.data(withJSONObject: addonVersions, options: [.prettyPrinted, .sortedKeys]) {
+            try? d.write(to: Paths.addonVersions)
+        }
+        updates.remove(addon)
+    }
+
+    struct Asset { let name: String; let url: URL; let size: Int; let updated: String }
+
+    nonisolated static func latestRelease(_ repo: String) async throws -> (tag: String, assets: [Asset]) {
+        var req = URLRequest(url: URL(string: "https://api.github.com/repos/\(repo)/releases/latest")!)
+        req.setValue("BeamNG-Mac-Launcher", forHTTPHeaderField: "User-Agent")
+        req.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        let (d, r) = try await URLSession.shared.data(for: req)
+        guard (r as? HTTPURLResponse)?.statusCode == 200,
+              let o = try JSONSerialization.jsonObject(with: d) as? [String: Any] else {
+            throw LauncherError(L("GitHub didn't answer. Check your internet connection."))
+        }
+        let assets = (o["assets"] as? [[String: Any]] ?? []).compactMap { a -> Asset? in
+            guard let n = a["name"] as? String, let u = (a["browser_download_url"] as? String).flatMap(URL.init) else { return nil }
+            return Asset(name: n, url: u, size: a["size"] as? Int ?? 0, updated: String((a["updated_at"] as? String ?? "").prefix(10)))
+        }
+        return (o["tag_name"] as? String ?? "", assets)
+    }
+
+    static func earthAsset(_ a: [Asset]) -> Asset? {
+        a.first { $0.name.hasPrefix("BeamNG.Earth-") && $0.name.hasSuffix(".exe") && !$0.name.contains("Host") }
+    }
+
+    /// Downloads to a temporary file, showing progress in the window.
+    func download(_ url: URL, title: String) async throws -> URL {
+        downloading = true; downloadTitle = title; downloadFraction = 0
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                if let t = self?.downloadTask, t.countOfBytesExpectedToReceive > 0 {
+                    self?.downloadFraction = Double(t.countOfBytesReceived) / Double(t.countOfBytesExpectedToReceive)
+                }
+            }
+        }
+        defer { downloading = false; progressTimer?.invalidate(); progressTimer = nil; downloadTask = nil }
+        return try await withCheckedThrowingContinuation { cont in
+            var req = URLRequest(url: url)
+            req.setValue("BeamNG-Mac-Launcher", forHTTPHeaderField: "User-Agent")
+            let task = URLSession.shared.downloadTask(with: req) { loc, resp, err in
+                if let err = err as? URLError, err.code == .cancelled { cont.resume(throwing: LauncherError(L("Download cancelled."))); return }
+                if let err { cont.resume(throwing: err); return }
+                guard let loc, (resp as? HTTPURLResponse)?.statusCode == 200 else {
+                    cont.resume(throwing: LauncherError(L("The download failed."))); return
+                }
+                let keep = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+                do { try FileManager.default.moveItem(at: loc, to: keep); cont.resume(returning: keep) }
+                catch { cont.resume(throwing: error) }
+            }
+            downloadTask = task
+            task.resume()
+        }
+    }
+
+    func cancelDownload() { downloadTask?.cancel() }
+
+    nonisolated static func sha256(_ url: URL) -> String {
+        guard let h = try? FileHandle(forReadingFrom: url) else { return "" }
+        defer { try? h.close() }
+        var hasher = SHA256()
+        while let chunk = try? h.read(upToCount: 8 << 20), !chunk.isEmpty { hasher.update(data: chunk) }
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func place(_ tmp: URL, at dst: URL) throws {
+        let fm = FileManager.default
+        try fm.createDirectory(at: dst.deletingLastPathComponent(), withIntermediateDirectories: true)
+        if fm.fileExists(atPath: dst.path) { try fm.removeItem(at: dst) }
+        try fm.moveItem(at: tmp, to: dst)
+    }
+
+    private func runAddonJob(_ job: @escaping @MainActor () async throws -> String) {
+        guard !downloading else { return }
+        Task {
+            do { message = try await job() }
+            catch { message = error.localizedDescription }
+            refreshAddons()
+        }
+    }
+
+    func installBeamMP() {
+        runAddonJob {
+            let rel = try await Launcher.latestRelease("BeamMP/BeamMP-Launcher")
+            guard let exe = rel.assets.first(where: { $0.name == "BeamMP-Launcher.exe" }) else {
+                throw LauncherError(L("BeamMP's latest release has no Windows launcher."))
+            }
+            let tmp = try await self.download(exe.url, title: "BeamMP \(rel.tag)")
+            if let sum = rel.assets.first(where: { $0.name == "BeamMP-Launcher.exe.sha256" }) {
+                let (d, _) = try await URLSession.shared.data(from: sum.url)
+                let want = String(decoding: d, as: UTF8.self).split(whereSeparator: { $0 == " " || $0.isNewline }).first.map { $0.lowercased() }
+                if let want, want != Launcher.sha256(tmp) {
+                    try? FileManager.default.removeItem(at: tmp)
+                    throw LauncherError(L("The BeamMP download was damaged (checksum mismatch). Try again."))
+                }
+            }
+            try self.place(tmp, at: Paths.beammpExe)
+            self.saveVersion("beammp", rel.tag)
+            self.conf.beammp = true; self.conf.save()
+            return L("BeamMP %@ installed. Multiplayer is on.", rel.tag)
+        }
+    }
+
+    func installEarth() {
+        runAddonJob {
+            let rel = try await Launcher.latestRelease("TecnaGamer/BeamNG.Earth")
+            guard let exe = Launcher.earthAsset(rel.assets) else { throw LauncherError(L("BeamNG.Earth's latest release has no Windows app.")) }
+            let tmp = try await self.download(exe.url, title: "BeamNG.Earth \(rel.tag)")
+            try self.place(tmp, at: Paths.earthExe)
+            self.saveVersion("earth", rel.tag)
+            self.conf.earth = true; self.conf.save()
+            return L("BeamNG.Earth %@ installed. In the game: Freeroam → BeamNG.Earth.", rel.tag)
+        }
+    }
+
+    func installEarthNG() {
+        runAddonJob {
+            let rel = try await Launcher.latestRelease("Alezx311/earthng")
+            guard let zip = rel.assets.first(where: { $0.name == "earthng_planet.zip" }) else { throw LauncherError(L("EarthNG's release has no planet mod.")) }
+            let tmp = try await self.download(zip.url, title: "EarthNG")
+            try self.place(tmp, at: Paths.earthngPlanet)
+            self.saveVersion("earthng", zip.updated)
+            return self.earthngPacks.isEmpty && !FileManager.default.fileExists(atPath: Paths.mods.appendingPathComponent("earthng_albania.zip").path)
+                ? L("EarthNG installed. It also needs a map pack: get Albania or add one you downloaded.")
+                : L("EarthNG installed. In the game: Freeroam → EarthNG - Planet.")
+        }
+    }
+
+    func installEarthNGAlbania() {
+        runAddonJob {
+            let rel = try await Launcher.latestRelease("Alezx311/earthng")
+            guard let zip = rel.assets.first(where: { $0.name == "earthng_albania.zip" }) else { throw LauncherError(L("That map pack is no longer on GitHub.")) }
+            let tmp = try await self.download(zip.url, title: "EarthNG Albania")
+            try self.place(tmp, at: Paths.mods.appendingPathComponent(zip.name))
+            return L("Map pack added: %@.", "Albania")
+        }
+    }
+
+    func addEarthNGPack() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.zip]; panel.allowsMultipleSelection = true
+        panel.message = L("Choose EarthNG map packs (earthng_<country>.zip)")
+        panel.directoryURL = Paths.home.appendingPathComponent("Downloads")
+        guard panel.runModal() == .OK else { return }
+        var added: [String] = []
+        for url in panel.urls {
+            let name = url.lastPathComponent.lowercased()
+            guard name.hasPrefix("earthng_"), name != "earthng_planet.zip" else { continue }
+            let dst = Paths.mods.appendingPathComponent(name)
+            try? FileManager.default.removeItem(at: dst)
+            if (try? FileManager.default.copyItem(at: url, to: dst)) != nil { added.append(url.lastPathComponent) }
+        }
+        refreshAddons()
+        message = added.isEmpty ? L("No EarthNG map pack chosen (the file name must start with earthng_).")
+                                : L("Map pack added: %@.", added.joined(separator: ", "))
+    }
+
+    func removeAddon(_ addon: String) {
+        guard state == .stopped else { message = L("Quit the game first."); return }
+        let fm = FileManager.default
+        func trash(_ u: URL) { if fm.fileExists(atPath: u.path) { try? fm.trashItem(at: u, resultingItemURL: nil) } }
+        switch addon {
+        case "beammp":
+            trash(Paths.beammpExe.deletingLastPathComponent())
+            trash(Paths.mods.appendingPathComponent("multiplayer"))
+            conf.beammp = false
+        case "earth":
+            trash(Paths.earthExe.deletingLastPathComponent())
+            trash(Paths.earthMod)
+            conf.earth = false
+        default:
+            trash(Paths.earthngPlanet)
+            for f in (try? fm.contentsOfDirectory(atPath: Paths.mods.path)) ?? [] where f.hasPrefix("earthng_") && f.hasSuffix(".zip") {
+                trash(Paths.mods.appendingPathComponent(f))
+            }
+        }
+        conf.save()
+        saveVersion(addon, nil)
+        refreshAddons()
+        message = L("Removed (moved to the Trash).")
+    }
+
+    /// Notes which installed add-ons have a newer GitHub release (BeamMP updates itself).
+    func checkAddonUpdates() async {
+        if earthInstalled, let rel = try? await Launcher.latestRelease("TecnaGamer/BeamNG.Earth"),
+           !rel.tag.isEmpty, rel.tag != addonVersions["earth"] { updates.insert("earth") }
+        if earthngInstalled, let rel = try? await Launcher.latestRelease("Alezx311/earthng"),
+           let zip = rel.assets.first(where: { $0.name == "earthng_planet.zip" }),
+           !zip.updated.isEmpty, zip.updated != addonVersions["earthng"] { updates.insert("earthng") }
+    }
+
+    func setMultiplayer(_ on: Bool) {
+        if on && !beammpInstalled { installBeamMP(); return }
+        conf.beammp = on; conf.save()
+        message = state == .stopped ? (on ? L("Multiplayer on: BeamMP starts with the game.") : L("Single player."))
+                                    : L("Takes effect next time the game starts.")
+    }
+
+    func setEarth(_ on: Bool) {
+        if on && !earthInstalled { installEarth(); return }
+        conf.earth = on; conf.save()
+        message = state == .stopped ? (on ? L("BeamNG.Earth starts with the game. In the game: Freeroam → BeamNG.Earth.") : L("BeamNG.Earth off."))
+                                    : L("Takes effect next time the game starts.")
+    }
+
+    /// BeamMP finds the game through BeamNG.Drive.ini (the game writes it too, but only once it has run).
+    func writeBeamNGIni() {
+        let win = "Z:" + conf.gameDir.replacingOccurrences(of: "/", with: "\\") + "\\"
+        var lines = ((try? String(contentsOf: Paths.beamngIni, encoding: .utf8)) ?? "")
+            .replacingOccurrences(of: "\u{FEFF}", with: "")
+            .components(separatedBy: .newlines).filter { !$0.isEmpty && !$0.hasPrefix("installPath") }
+        lines.append("installPath = \(win)")
+        try? FileManager.default.createDirectory(at: Paths.beamngIni.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? (lines.joined(separator: "\n") + "\n").write(to: Paths.beamngIni, atomically: true, encoding: .utf8)
     }
 
     // MARK: game control
 
     func play() {
-        guard setupComplete else { message = "Finish setup first."; return }
+        guard setupComplete else { message = L("Finish setup first."); return }
+        if conf.beammp && !beammpInstalled { conf.beammp = false }
+        if conf.earth && !earthInstalled { conf.earth = false }
         conf.save()
+        if conf.beammp { writeBeamNGIni() }
         if !pendingChanges.isEmpty { GameSettingsFile.merge(pendingChanges); pendingChanges = [:] }
         runShell(Paths.bin.appendingPathComponent("launch.sh"), wait: false)
         state = .starting; lastState = .starting
-        message = "Starting BeamNG…"
+        message = L("Starting BeamNG…")
     }
 
     func quitGame(then: (@MainActor () -> Void)? = nil) {
-        busy = true; message = "Closing BeamNG…"
+        busy = true; message = L("Closing BeamNG…")
         Task.detached {
             runShell(Paths.bin.appendingPathComponent("quit.sh"))
             await MainActor.run {
                 self.busy = false
                 self.tick()
-                self.message = self.state == .stopped ? "BeamNG closed." : "BeamNG is still closing…"
+                self.message = self.state == .stopped ? L("BeamNG closed.") : L("BeamNG is still closing…")
                 then?()
             }
         }
@@ -533,19 +882,19 @@ final class Launcher: ObservableObject {
     func restart() { quitGame { self.play() } }
 
     func clearShaderCache() {
-        guard state == .stopped else { message = "Quit the game first."; return }
+        guard state == .stopped else { message = L("Quit the game first."); return }
         let fm = FileManager.default
         var removed = 0
         for url in [Paths.userRoot.appendingPathComponent("temp/shaders"),
                     Paths.userCache.appendingPathComponent("d3dm/BeamNG.drive.x64.exe")] where fm.fileExists(atPath: url.path) {
             if (try? fm.trashItem(at: url, resultingItemURL: nil)) != nil { removed += 1 }
         }
-        message = removed > 0 ? "Shader caches moved to the Trash. The next start will be slower while they rebuild."
-                              : "No shader cache to clear."
+        message = removed > 0 ? L("Shader caches moved to the Trash. The next start will be slower while they rebuild.")
+                              : L("No shader cache to clear.")
     }
 
     func resetDefaults() {
-        guard state == .stopped else { message = "Quit the game first."; return }
+        guard state == .stopped else { message = L("Quit the game first."); return }
         GameSettingsFile.backup(tag: "launcher-reset")
         var p = gamePresets(gameDir: conf.gameDir)["High"] ?? [:]
         p["GraphicOverallQuality"] = "High"
@@ -558,7 +907,7 @@ final class Launcher: ObservableObject {
         conf.gptkVersion = "current"; conf.save()
         if fogFix { setFogFix(false) }
         loadGraphics()
-        message = "Back to recommended settings (High, native resolution, FSR 3, windowed). Old settings were backed up."
+        message = L("Back to recommended settings (High, native resolution, FSR 3, windowed). Old settings were backed up.")
     }
 
     // MARK: setup actions
@@ -566,28 +915,28 @@ final class Launcher: ObservableObject {
     func chooseGameDir() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true; panel.canChooseFiles = false
-        panel.message = "Choose the BeamNG.drive folder (the one that contains BeamNG.drive.exe)"
+        panel.message = L("Choose the BeamNG.drive folder (the one that contains BeamNG.drive.exe)")
         guard panel.runModal() == .OK, let url = panel.url else { return }
         if FileManager.default.fileExists(atPath: url.appendingPathComponent("BeamNG.drive.exe").path) {
             conf.gameDir = url.path; conf.save(); loadGraphics()
-            message = "Game folder set."
+            message = L("Game folder set.")
         } else {
-            message = "That folder doesn't contain BeamNG.drive.exe."
+            message = L("That folder doesn't contain BeamNG.drive.exe.")
         }
     }
 
     func installGPTK() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.diskImage]
-        panel.message = "Choose Apple's \"Evaluation environment for Windows games\" .dmg"
+        panel.message = L("Choose Apple's \"Evaluation environment for Windows games\" .dmg")
         panel.directoryURL = Paths.home.appendingPathComponent("Downloads")
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        busy = true; message = "Installing GPTK…"
+        busy = true; message = L("Installing GPTK…")
         Task.detached {
             let (code, out) = runShell(Paths.bin.appendingPathComponent("install-gptk.sh"), [url.path])
             await MainActor.run {
                 self.busy = false
-                self.message = code == 0 ? out.trimmingCharacters(in: .whitespacesAndNewlines) : "GPTK install failed: \(out)"
+                self.message = code == 0 ? out.trimmingCharacters(in: .whitespacesAndNewlines) : L("GPTK install failed: %@", out)
                 self.conf.gptkVersion = "current"; self.conf.save()
                 self.refreshSetup()
             }
@@ -599,12 +948,12 @@ final class Launcher: ObservableObject {
         try? FileManager.default.createSymbolicLink(atPath: Paths.gptk.appendingPathComponent("current").path, withDestinationPath: v)
         conf.gptkVersion = "current"; conf.save()
         refreshSetup()
-        message = "Using GPTK \(v)" + (state == .stopped ? "." : " from the next start.")
+        message = state == .stopped ? L("Using GPTK %@.", v) : L("Using GPTK %@ from the next start.", v)
     }
 
     func importRuntime() {
-        guard state == .stopped else { message = "Quit the game first."; return }
-        busy = true; message = "Importing Wine from GameHub… (this takes a few seconds)"
+        guard state == .stopped else { message = L("Quit the game first."); return }
+        busy = true; message = L("Importing Wine from GameHub… (this takes a few seconds)")
         Task.detached {
             let (code, out) = runShell(Paths.bin.appendingPathComponent("setup-runtime.sh"))
             await MainActor.run {
@@ -629,7 +978,7 @@ struct StatusDot: View {
         }
     }
     var color: Color { state == .running ? .green : (state == .starting ? .orange : .gray) }
-    var label: String { state == .running ? "Running" : (state == .starting ? "Starting…" : "Not running") }
+    var label: String { state == .running ? L("Running") : (state == .starting ? L("Starting…") : L("Not running")) }
 }
 
 struct CheckRow: View {
@@ -641,15 +990,22 @@ struct CheckRow: View {
                 .foregroundStyle(ok ? .green : (optional ? .gray : .red))
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
-                if !detail.isEmpty { Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(2).truncationMode(.middle) }
+                if !detail.isEmpty { Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(3).truncationMode(.middle) }
             }
         }
     }
 }
 
+struct Caption: View {
+    let text: String
+    init(_ t: String) { text = t }
+    var body: some View { Text(text).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true) }
+}
+
 struct ContentView: View {
     @EnvironmentObject var m: Launcher
     @AppStorage("showAdvanced") var showAdvanced = false
+    @State private var launcherLanguage = Languages.launcherOverride
 
     var body: some View {
         VStack(spacing: 0) {
@@ -658,9 +1014,11 @@ struct ContentView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     if !m.setupComplete { setupBox }
+                    playBox
                     graphicsBox
+                    languageBox
                     controllersBox
-                    Toggle("Enable advanced settings", isOn: $showAdvanced.animation(.easeInOut(duration: 0.2)))
+                    Toggle(L("Enable advanced settings"), isOn: $showAdvanced.animation(.easeInOut(duration: 0.2)))
                         .toggleStyle(.switch).controlSize(.small)
                         .padding(.horizontal, 4)
                     if showAdvanced {
@@ -670,18 +1028,27 @@ struct ContentView: View {
                 }
                 .padding(16)
             }
-            if !m.message.isEmpty {
+            if m.downloading {
+                Divider()
+                HStack(spacing: 10) {
+                    Text(L("Downloading %@…", m.downloadTitle)).font(.caption).lineLimit(1)
+                    ProgressView(value: m.downloadFraction).frame(maxWidth: .infinity)
+                    Text("\(Int(m.downloadFraction * 100))%").font(.caption).monospacedDigit()
+                    Button(L("Cancel")) { m.cancelDownload() }.controlSize(.small)
+                }
+                .padding(.horizontal, 16).padding(.vertical, 8)
+            } else if !m.message.isEmpty {
                 Divider()
                 HStack {
                     if m.busy { ProgressView().controlSize(.small) }
-                    Text(m.message).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    Text(m.message).font(.caption).foregroundStyle(.secondary).lineLimit(3)
                     Spacer()
                 }
                 .padding(.horizontal, 16).padding(.vertical, 8)
             }
         }
         .frame(width: 460)
-        .frame(minHeight: 400, idealHeight: 520, maxHeight: .infinity)
+        .frame(minHeight: 400, idealHeight: 560, maxHeight: .infinity)
     }
 
     var header: some View {
@@ -694,174 +1061,327 @@ struct ContentView: View {
                     Text("GPTK \(m.currentGPTK.isEmpty ? "—" : m.currentGPTK)\(m.conf.metal4 ? " · Metal 4" : "")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                if m.state != .stopped && (m.conf.beammp || m.conf.earth) {
+                    HStack(spacing: 10) {
+                        if m.conf.beammp { helperBadge("BeamMP", m.beammpRunning) }
+                        if m.conf.earth { helperBadge("BeamNG.Earth", m.earthRunning) }
+                    }
+                }
             }
             Spacer()
             if m.state == .stopped {
-                Button { m.play() } label: { Label("Play", systemImage: "play.fill").frame(minWidth: 70) }
+                Button { m.play() } label: { Label(L("Play"), systemImage: "play.fill").frame(minWidth: 70) }
                     .buttonStyle(.borderedProminent).controlSize(.large)
-                    .disabled(!m.setupComplete || m.busy)
+                    .disabled(!m.setupComplete || m.busy || m.downloading)
                     .keyboardShortcut(.defaultAction)
             } else {
-                Button { m.restart() } label: { Label("Restart", systemImage: "arrow.clockwise") }
+                Button { m.restart() } label: { Label(L("Restart"), systemImage: "arrow.clockwise") }
                     .controlSize(.large).disabled(m.busy)
-                Button(role: .destructive) { m.quitGame() } label: { Label("Quit", systemImage: "stop.fill") }
+                Button(role: .destructive) { m.quitGame() } label: { Label(L("Quit"), systemImage: "stop.fill") }
                     .controlSize(.large).disabled(m.busy)
             }
         }
         .padding(16)
     }
 
+    func helperBadge(_ name: String, _ on: Bool) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(on ? Color.green : Color.orange).frame(width: 6, height: 6)
+            Text(name).font(.caption2).foregroundStyle(.secondary)
+        }
+        .help(on ? L("Running") : L("Starting…"))
+    }
+
     var setupBox: some View {
-        GroupBox("Setup") {
+        GroupBox(L("Setup")) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    CheckRow(ok: m.wineOK && m.prefixOK, title: "Wine runtime",
-                             detail: m.wineOK && m.prefixOK ? "Installed" : "Imported from GameHub (install it and run any game once)")
+                    CheckRow(ok: m.wineOK && m.prefixOK, title: L("Wine runtime"),
+                             detail: m.wineOK && m.prefixOK ? L("Installed") : L("Imported from GameHub (install it and run any game once)"))
                     Spacer()
-                    Button("Import from GameHub") { m.importRuntime() }.disabled(m.busy)
+                    Button(L("Import from GameHub")) { m.importRuntime() }.disabled(m.busy)
                 }
                 HStack {
-                    CheckRow(ok: m.gptkOK, title: "Apple Game Porting Toolkit",
-                             detail: m.gptkOK ? m.currentGPTK : "Download \"Evaluation environment for Windows games\" from Apple")
+                    CheckRow(ok: m.gptkOK, title: L("Apple Game Porting Toolkit"),
+                             detail: m.gptkOK ? m.currentGPTK : L("Download \"Evaluation environment for Windows games\" from Apple"))
                     Spacer()
-                    Button("Get from Apple") { m.open(URL(string: "https://developer.apple.com/download/all/?q=game%20porting%20toolkit")!) }
-                    Button("Install .dmg…") { m.installGPTK() }.disabled(m.busy)
+                    Button(L("Get from Apple")) { m.open(URL(string: "https://developer.apple.com/download/all/?q=game%20porting%20toolkit")!) }
+                    Button(L("Install .dmg…")) { m.installGPTK() }.disabled(m.busy)
                 }
                 HStack {
-                    CheckRow(ok: m.gameDirOK, title: "BeamNG.drive folder", detail: m.gameDirOK ? m.conf.gameDir : "Not chosen")
+                    CheckRow(ok: m.gameDirOK, title: L("BeamNG.drive folder"), detail: m.gameDirOK ? m.conf.gameDir : L("Not chosen"))
                     Spacer()
-                    Button("Choose…") { m.chooseGameDir() }
+                    Button(L("Choose…")) { m.chooseGameDir() }
                 }
             }
             .padding(6)
         }
     }
 
+    // MARK: play mode, multiplayer and real-world maps
+
+    func updateBadge(_ addon: String, _ action: @escaping () -> Void) -> some View {
+        Group {
+            if m.updates.contains(addon) {
+                Button(L("Update")) { action() }.controlSize(.small).tint(.orange).disabled(m.downloading)
+            }
+        }
+    }
+
+    var playBox: some View {
+        GroupBox(L("Play")) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Picker("", selection: Binding(get: { m.conf.beammp }, set: { m.setMultiplayer($0) })) {
+                        Text(L("Single player")).tag(false)
+                        Text(L("Multiplayer (BeamMP)")).tag(true)
+                    }
+                    .pickerStyle(.segmented).labelsHidden().disabled(m.downloading)
+                    if m.beammpInstalled {
+                        Menu {
+                            Button(L("Update BeamMP")) { m.installBeamMP() }
+                            Button(L("Open BeamMP log")) { m.open(Paths.logs.appendingPathComponent("beammp.log")) }
+                            Button(L("BeamMP website")) { m.open(URL(string: "https://beammp.com")!) }
+                            Divider()
+                            Button(L("Remove BeamMP")) { m.removeAddon("beammp") }
+                        } label: { Image(systemName: "ellipsis.circle") }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                    }
+                }
+                if m.conf.beammp {
+                    Caption(L("BeamMP %@ starts before the game. In the game, open Multiplayer and pick a server.", m.addonVersions["beammp"] ?? ""))
+                } else if !m.beammpInstalled {
+                    Caption(L("Multiplayer downloads the official BeamMP launcher (about 8 MB) from GitHub."))
+                }
+
+                Divider()
+                HStack(spacing: 6) {
+                    Text(L("Real-world maps")).font(.callout.weight(.semibold))
+                    Text(L("experimental")).font(.caption2.weight(.semibold)).foregroundStyle(.orange)
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(Capsule().stroke(.orange.opacity(0.6)))
+                }
+
+                // BeamNG.Earth
+                HStack(alignment: .top) {
+                    Toggle(isOn: Binding(get: { m.conf.earth }, set: { m.setEarth($0) })) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("BeamNG.Earth" + (m.addonVersions["earth"].map { "  \($0)" } ?? ""))
+                            Caption(m.earthInstalled
+                                ? L("The whole planet, streamed from satellite and map data while you drive. In the game: Freeroam → BeamNG.Earth.")
+                                : L("The whole planet, streamed from satellite and map data while you drive. About 90 MB; needs internet."))
+                        }
+                    }
+                    .disabled(m.downloading)
+                    Spacer()
+                    updateBadge("earth") { m.installEarth() }
+                    if m.earthInstalled {
+                        Menu {
+                            Button(L("Update BeamNG.Earth")) { m.installEarth() }
+                            Button(L("Open BeamNG.Earth log")) { m.open(Paths.prefix.appendingPathComponent("drive_c/users/steamuser/AppData/Local/beamng-earth/logs/server.log")) }
+                            Button(L("Project page")) { m.open(URL(string: "https://github.com/TecnaGamer/BeamNG.Earth")!) }
+                            Divider()
+                            Button(L("Remove BeamNG.Earth")) { m.removeAddon("earth") }
+                        } label: { Image(systemName: "ellipsis.circle") }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                    }
+                }
+
+                // EarthNG
+                HStack(alignment: .top) {
+                    CheckRow(ok: m.earthngInstalled, title: "EarthNG", detail: earthngDetail, optional: true)
+                    Spacer()
+                    if m.earthngInstalled {
+                        updateBadge("earthng") { m.installEarthNG() }
+                        Menu {
+                            Button(L("Get the Albania map (226 MB)")) { m.installEarthNGAlbania() }
+                            Button(L("Add map pack…")) { m.addEarthNGPack() }
+                            Button(L("More maps")) { m.open(URL(string: "https://github.com/Alezx311/earthng#install-and-play")!) }
+                            Divider()
+                            Button(L("Update EarthNG")) { m.installEarthNG() }
+                            Button(L("Remove EarthNG and its maps")) { m.removeAddon("earthng") }
+                        } label: { Image(systemName: "ellipsis.circle") }
+                        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                    } else {
+                        Button(L("Install")) { m.installEarthNG() }.disabled(m.downloading)
+                    }
+                }
+            }
+            .padding(6).frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    var earthngDetail: String {
+        if !m.earthngInstalled {
+            return L("Real towns built from OpenStreetMap inside the game, no extra app running. About 280 MB plus a map pack.")
+        }
+        return m.earthngPacks.isEmpty ? L("No map pack yet: get Albania or add one from the … menu.")
+                                      : L("Maps: %@. In the game: Freeroam → EarthNG - Planet.", m.earthngPacks.joined(separator: ", "))
+    }
+
+    // MARK: graphics
+
     var graphicsBox: some View {
-        GroupBox("Graphics") {
+        GroupBox(L("Graphics")) {
             VStack(alignment: .leading, spacing: 10) {
                 if !m.pendingChanges.isEmpty {
                     HStack {
                         Image(systemName: "clock.arrow.circlepath").foregroundStyle(.orange)
-                        Text("Changes wait until the game restarts.").font(.callout)
+                        Text(L("Changes wait until the game restarts.")).font(.callout)
                         Spacer()
-                        Button("Apply & Restart") { m.restart() }.disabled(m.busy)
+                        Button(L("Apply & Restart")) { m.restart() }.disabled(m.busy)
                     }
                 }
-                LabeledContent("Preset") {
+                LabeledContent(L("Preset")) {
                     Picker("", selection: Binding(get: { m.preset }, set: { m.applyPreset($0) })) {
-                        ForEach(m.presetNames, id: \.self) { Text($0).tag($0) }
-                        if !m.presetNames.contains(m.preset) { Text(m.preset).tag(m.preset) }
+                        ForEach(m.presetNames, id: \.self) { Text(L($0)).tag($0) }
+                        if !m.presetNames.contains(m.preset) { Text(L(m.preset)).tag(m.preset) }
                     }
                     .pickerStyle(.segmented).labelsHidden()
                 }
                 if showAdvanced { advancedGraphics }
-                LabeledContent("Window size") {
+                LabeledContent(L("Window size")) {
                     Picker("", selection: Binding(get: { m.windowRes }, set: { m.setWindow($0) })) {
                         ForEach(m.windowChoices, id: \.0) { Text($0.1).tag($0.0) }
                     }.labelsHidden().frame(width: 220)
                 }
-                Toggle("Show FPS counter", isOn: Binding(get: { m.conf.fpsHUD }, set: { m.conf.fpsHUD = $0; m.conf.save(); m.message = "FPS counter \($0 ? "on" : "off") from the next start." }))
+                Toggle(L("Show FPS counter"), isOn: Binding(get: { m.conf.fpsHUD }, set: {
+                    m.conf.fpsHUD = $0; m.conf.save()
+                    m.message = $0 ? L("FPS counter on from the next start.") : L("FPS counter off from the next start.")
+                }))
             }
             .padding(6)
         }
     }
 
     @ViewBuilder var advancedGraphics: some View {
-                LabeledContent("Anti-aliasing") {
-                    Picker("", selection: Binding(get: { m.aaType }, set: { m.setAA($0) })) {
-                        Text("Off").tag("off"); Text("FXAA").tag("fxaa"); Text("SMAA").tag("smaa")
-                        Text("SMAA T2x").tag("smaaT2x"); Text("FSR 3 (best)").tag("fsr3")
-                        if !["off", "fxaa", "smaa", "smaaT2x", "fsr3"].contains(m.aaType) { Text(m.aaType).tag(m.aaType) }
-                    }
-                    .labelsHidden().frame(width: 180)
+        LabeledContent(L("Anti-aliasing")) {
+            Picker("", selection: Binding(get: { m.aaType }, set: { m.setAA($0) })) {
+                Text(L("Off")).tag("off"); Text("FXAA").tag("fxaa"); Text("SMAA").tag("smaa")
+                Text("SMAA T2x").tag("smaaT2x"); Text(L("FSR 3 (best)")).tag("fsr3")
+                if !["off", "fxaa", "smaa", "smaaT2x", "fsr3"].contains(m.aaType) { Text(m.aaType).tag(m.aaType) }
+            }
+            .labelsHidden().frame(width: 180)
+        }
+        LabeledContent(L("Render scale")) {
+            HStack {
+                Slider(value: $m.renderScale, in: 0.5...1.0, step: 0.05) { editing in
+                    if !editing { m.change(["GraphicUpscalingQuality": (m.renderScale * 100).rounded() / 100]) }
                 }
-                LabeledContent("Render scale") {
-                    HStack {
-                        Slider(value: $m.renderScale, in: 0.5...1.0, step: 0.05) { editing in
-                            if !editing { m.change(["GraphicUpscalingQuality": (m.renderScale * 100).rounded() / 100]) }
-                        }
-                        Text("\(Int((m.renderScale * 100).rounded()))%").monospacedDigit().frame(width: 44, alignment: .trailing)
-                    }
+                Text("\(Int((m.renderScale * 100).rounded()))%").monospacedDigit().frame(width: 44, alignment: .trailing)
+            }
+        }
+        .disabled(m.aaType != "fsr3")
+        LabeledContent(L("Sharpness")) {
+            HStack {
+                Slider(value: $m.sharpness, in: 0...1, step: 0.05) { editing in
+                    if !editing { m.change(["GraphicUpscalingSharpness": (m.sharpness * 100).rounded() / 100]) }
                 }
-                .disabled(m.aaType != "fsr3")
-                LabeledContent("Sharpness") {
-                    HStack {
-                        Slider(value: $m.sharpness, in: 0...1, step: 0.05) { editing in
-                            if !editing { m.change(["GraphicUpscalingSharpness": (m.sharpness * 100).rounded() / 100]) }
-                        }
-                        Text("\(Int((m.sharpness * 100).rounded()))%").monospacedDigit().frame(width: 44, alignment: .trailing)
-                    }
-                }
-                .disabled(m.aaType != "fsr3")
-                if m.aaType != "fsr3" {
-                    Text("Render scale and sharpness work with FSR 3.").font(.caption).foregroundStyle(.secondary)
-                }
-                HStack(spacing: 16) {
-                    LabeledContent("Shadows") {
-                        Picker("", selection: Binding(get: { m.shadows }, set: { m.shadows = $0; m.setDetail("GraphicShadowsQuality", $0) })) {
-                            ForEach(["Disabled", "Lowest", "Low", "Normal", "High", "Ultra"], id: \.self) { Text($0).tag($0) }
-                        }.labelsHidden().frame(width: 110)
-                    }
-                    LabeledContent("Meshes") {
-                        Picker("", selection: Binding(get: { m.meshes }, set: { m.meshes = $0; m.setDetail("GraphicMeshQuality", $0) })) {
-                            ForEach(["Lowest", "Low", "Normal", "High", "Ultra"], id: \.self) { Text($0).tag($0) }
-                        }.labelsHidden().frame(width: 100)
-                    }
-                }
+                Text("\(Int((m.sharpness * 100).rounded()))%").monospacedDigit().frame(width: 44, alignment: .trailing)
+            }
+        }
+        .disabled(m.aaType != "fsr3")
+        if m.aaType != "fsr3" {
+            Caption(L("Render scale and sharpness work with FSR 3."))
+        }
+        HStack(spacing: 16) {
+            LabeledContent(L("Shadows")) {
+                Picker("", selection: Binding(get: { m.shadows }, set: { m.shadows = $0; m.setDetail("GraphicShadowsQuality", $0) })) {
+                    ForEach(["Disabled", "Lowest", "Low", "Normal", "High", "Ultra"], id: \.self) { Text(L($0)).tag($0) }
+                }.labelsHidden().frame(width: 110)
+            }
+            LabeledContent(L("Meshes")) {
+                Picker("", selection: Binding(get: { m.meshes }, set: { m.meshes = $0; m.setDetail("GraphicMeshQuality", $0) })) {
+                    ForEach(["Lowest", "Low", "Normal", "High", "Ultra"], id: \.self) { Text(L($0)).tag($0) }
+                }.labelsHidden().frame(width: 100)
+            }
+        }
     }
+
+    // MARK: language
+
+    var languageBox: some View {
+        GroupBox(L("Language")) {
+            VStack(alignment: .leading, spacing: 8) {
+                LabeledContent(L("Game")) {
+                    Picker("", selection: Binding(get: { m.gameLanguage }, set: { m.setGameLanguage($0) })) {
+                        Text(L("Automatic")).tag("")
+                        ForEach(m.gameLanguages, id: \.self) { Text(Languages.name($0)).tag($0) }
+                        if !m.gameLanguage.isEmpty && !m.gameLanguages.contains(m.gameLanguage) {
+                            Text(m.gameLanguage).tag(m.gameLanguage)
+                        }
+                    }.labelsHidden().frame(width: 220)
+                }
+                LabeledContent(L("Launcher")) {
+                    Picker("", selection: Binding(get: { launcherLanguage }, set: { launcherLanguage = $0; m.setLauncherLanguage($0) })) {
+                        Text(L("Same as macOS")).tag("")
+                        ForEach(m.gameLanguages.compactMap { k in Languages.launcherCode[k].map { (k, $0) } }, id: \.1) {
+                            Text(Languages.name($0.0)).tag($0.1)
+                        }
+                    }.labelsHidden().frame(width: 220)
+                }
+            }
+            .padding(6).frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    // MARK: controllers
 
     var controllersBox: some View {
         GroupBox {
             VStack(alignment: .leading, spacing: 8) {
                 let pads = m.devices.filter { $0.kind != .wheel }
                 let wheels = m.devices.filter { $0.kind == .wheel }
-                CheckRow(ok: !pads.isEmpty, title: pads.isEmpty ? "No controller connected" : "Controller detected",
-                         detail: pads.map { "\($0.name) · \($0.connection)" }.joined(separator: "\n"), optional: true)
-                CheckRow(ok: !wheels.isEmpty, title: wheels.isEmpty ? "No steering wheel connected" : "Steering wheel detected",
-                         detail: wheels.map { "\($0.name) · \($0.connection)" }.joined(separator: "\n"), optional: true)
+                CheckRow(ok: !pads.isEmpty, title: pads.isEmpty ? L("No controller connected") : L("Controller detected"),
+                         detail: pads.map { "\($0.name) · \(L($0.connection))" }.joined(separator: "\n"), optional: true)
+                CheckRow(ok: !wheels.isEmpty, title: wheels.isEmpty ? L("No steering wheel connected") : L("Steering wheel detected"),
+                         detail: wheels.map { "\($0.name) · \(L($0.connection))" }.joined(separator: "\n"), optional: true)
                 if !m.seenByGame.isEmpty {
-                    Text("BeamNG saw last time: " + m.seenByGame.joined(separator: ", "))
-                        .font(.caption).foregroundStyle(.secondary)
+                    Caption(L("BeamNG saw last time: %@", m.seenByGame.joined(separator: ", ")))
                 }
             }
             .padding(6).frame(maxWidth: .infinity, alignment: .leading)
         } label: {
-            HStack { Text("Controllers"); Spacer(); Button { m.refreshDevices() } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.borderless).help("Scan again") }
+            HStack {
+                Text(L("Controllers")); Spacer()
+                Button { m.refreshDevices() } label: { Image(systemName: "arrow.clockwise") }.buttonStyle(.borderless).help(L("Scan again"))
+            }
         }
     }
 
+    // MARK: advanced
+
     var fixesBox: some View {
-        GroupBox("Compatibility") {
+        GroupBox(L("Compatibility")) {
             VStack(alignment: .leading, spacing: 8) {
                 Toggle(isOn: Binding(get: { m.conf.fixTrees }, set: { m.conf.fixTrees = $0; m.conf.save() })) {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("Fix missing trees and objects")
-                        Text("-nogfxgpudriven · needed until Apple fixes GPU-driven drawing; costs some FPS").font(.caption).foregroundStyle(.secondary)
+                        Text(L("Fix missing trees and objects"))
+                        Caption(L("-nogfxgpudriven · needed until Apple fixes GPU-driven drawing; costs some FPS"))
                     }
                 }
                 Toggle(isOn: Binding(get: { m.conf.metal4 }, set: { m.conf.metal4 = $0; m.conf.save() })) {
                     VStack(alignment: .leading, spacing: 1) {
                         Text("Metal 4")
-                        Text("Needed for shadows").font(.caption).foregroundStyle(.secondary)
+                        Caption(L("Needed for shadows"))
                     }
                 }
                 Toggle(isOn: Binding(get: { m.fogFix }, set: { m.setFogFix($0) })) {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("Disable fog (noFogFix mod)")
-                        Text("Only needed on GPTK 3 — GPTK 4 draws fog correctly").font(.caption).foregroundStyle(.secondary)
+                        Text(L("Disable fog (noFogFix mod)"))
+                        Caption(L("Only needed on GPTK 3 — GPTK 4 draws fog correctly"))
                     }
                 }
                 HStack {
-                    Text("GPTK version")
+                    Text(L("GPTK version"))
                     Picker("", selection: Binding(get: { m.currentGPTK }, set: { m.selectGPTK($0) })) {
                         ForEach(m.gptkVersions, id: \.self) { Text($0).tag($0) }
                     }.labelsHidden().frame(width: 110).disabled(m.gptkVersions.isEmpty)
                     Spacer()
-                    Button("Install .dmg…") { m.installGPTK() }.disabled(m.busy)
+                    Button(L("Install .dmg…")) { m.installGPTK() }.disabled(m.busy)
                 }
-                LabeledContent("Extra launch options") {
-                    TextField("e.g. -console", text: Binding(get: { m.conf.extraArgs }, set: { m.conf.extraArgs = $0; m.conf.save() }))
+                LabeledContent(L("Extra launch options")) {
+                    TextField(L("e.g. -console"), text: Binding(get: { m.conf.extraArgs }, set: { m.conf.extraArgs = $0; m.conf.save() }))
                         .textFieldStyle(.roundedBorder).frame(width: 200)
                 }
             }
@@ -870,18 +1390,18 @@ struct ContentView: View {
     }
 
     var toolsBox: some View {
-        GroupBox("Tools") {
+        GroupBox(L("Tools")) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Button("Clear shader cache") { m.clearShaderCache() }
-                    Button("Reset to defaults") { confirmReset() }
+                    Button(L("Clear shader cache")) { m.clearShaderCache() }
+                    Button(L("Reset to defaults")) { confirmReset() }
                 }
                 HStack {
-                    Button("Game folder…") { m.chooseGameDir() }
-                    Button("Open mods folder") { m.open(Paths.mods) }
-                    Button("Open game log") { m.open(Paths.gameLog) }
+                    Button(L("Game folder…")) { m.chooseGameDir() }
+                    Button(L("Open mods folder")) { m.open(Paths.mods) }
+                    Button(L("Open game log")) { m.open(Paths.gameLog) }
                 }
-                Text(m.conf.gameDir.isEmpty ? "No game folder chosen" : m.conf.gameDir)
+                Text(m.conf.gameDir.isEmpty ? L("No game folder chosen") : m.conf.gameDir)
                     .font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
             }
             .padding(6).frame(maxWidth: .infinity, alignment: .leading)
@@ -890,9 +1410,9 @@ struct ContentView: View {
 
     func confirmReset() {
         let a = NSAlert()
-        a.messageText = "Reset to recommended settings?"
-        a.informativeText = "High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first."
-        a.addButton(withTitle: "Reset"); a.addButton(withTitle: "Cancel")
+        a.messageText = L("Reset to recommended settings?")
+        a.informativeText = L("High preset, full resolution with FSR 3, windowed, tree fix and Metal 4 on, fog fix off. Your current game settings are backed up first.")
+        a.addButton(withTitle: L("Reset")); a.addButton(withTitle: L("Cancel"))
         if a.runModal() == .alertFirstButtonReturn { m.resetDefaults() }
     }
 }
@@ -912,7 +1432,7 @@ struct BeamNGLauncherApp: App {
         WindowGroup("BeamNG Launcher") {
             ContentView().environmentObject(model)
         }
-        .defaultSize(width: 460, height: 520)
+        .defaultSize(width: 460, height: 560)
         .windowResizability(.contentSize)
         .commands { CommandGroup(replacing: .newItem) {} }
     }

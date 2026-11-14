@@ -1,11 +1,14 @@
 #!/bin/zsh
 # Starts BeamNG.drive through Wine + Apple D3DMetal (GPTK). Settings come from launcher.conf.
+# Optional helpers started first, in the same Wine prefix: BeamMP (multiplayer) and BeamNG.Earth (world server).
 R="$HOME/Library/Application Support/BeamNG-GPTK4"
 GAME_DIR=""; GAME_ARGS="-nogfxgpudriven"; EXTRA_ARGS=""; METAL4=1; FPS_HUD=0; GPTK_VERSION=current
+BEAMMP=0; EARTH=0
 [ -f "$R/launcher.conf" ] && source "$R/launcher.conf"
 
 W=$(ls -d "$R"/containers/wine_installations/*(N/) | head -1)
 GPTK="$R/gptk/$GPTK_VERSION"
+ADDONS="$R/addons"
 LOG="$R/logs/last-launch.log"; mkdir -p "$R/logs"
 fail() { osascript -e "display alert \"BeamNG launcher\" message \"$1\""; echo "$1" >> "$LOG"; exit 1; }
 [ -x "$W/bin/wine" ] || fail "Wine runtime is missing. Open the launcher and run setup."
@@ -22,7 +25,43 @@ export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 [ "$METAL4" = 1 ] && export D3DM_MTL4=1
 [ "$FPS_HUD" = 1 ] && export MTL_HUD_ENABLED=1
 
-echo "== $(date) gptk=$(readlink "$GPTK" || echo "$GPTK_VERSION") metal4=$METAL4 fps=$FPS_HUD args=$GAME_ARGS $EXTRA_ARGS" > "$LOG"
+echo "== $(date) gptk=$(readlink "$GPTK" || echo "$GPTK_VERSION") metal4=$METAL4 fps=$FPS_HUD beammp=$BEAMMP earth=$EARTH args=$GAME_ARGS $EXTRA_ARGS" > "$LOG"
+
+wait_port() {   # port, seconds. lsof, not a test connection: BeamMP would take one for the game
+  for i in {1..$2}; do lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1 && return 0; sleep 1; done
+  return 1
+}
+stop_helpers() {
+  pkill -f "BeamMP-Launcher.exe" 2>/dev/null
+  pkill -f "BeamNG.Earth.exe" 2>/dev/null
+}
+trap stop_helpers EXIT
+
+if [ "$EARTH" = 1 ]; then
+  E="$ADDONS/beamng-earth/BeamNG.Earth.exe"
+  [ -f "$E" ] || fail "BeamNG.Earth is turned on but not installed. Install it in the launcher."
+  echo "starting BeamNG.Earth world server" >> "$LOG"
+  ( cd "$ADDONS/beamng-earth" && "$W/bin/wine" "$E" --no-game --no-beammp --no-update-check \
+      --user-dir 'C:\users\steamuser\AppData\Local\BeamNG\BeamNG.drive\current' > "$R/logs/beamng-earth.log" 2>&1 ) &
+  if wait_port 47613 300; then echo "BeamNG.Earth server is listening" >> "$LOG"
+  else echo "BeamNG.Earth server did not start listening in 5 minutes; starting the game anyway" >> "$LOG"; fi
+fi
+
+if [ "$BEAMMP" = 1 ]; then
+  B="$ADDONS/beammp/BeamMP-Launcher.exe"
+  [ -f "$B" ] || fail "Multiplayer is turned on but BeamMP is not installed. Install it in the launcher."
+  echo "starting BeamMP launcher" >> "$LOG"
+  ( cd "$ADDONS/beammp" && "$W/bin/wine" "$B" --no-launch > "$R/logs/beammp.log" 2>&1 ) &
+  if wait_port 4444 180; then echo "BeamMP launcher is listening" >> "$LOG"
+  else echo "BeamMP launcher did not start listening in 3 minutes; starting the game anyway" >> "$LOG"; fi
+fi
+
 cd "$GAME_DIR"
 "$W/bin/wine" "$GAME_DIR/BeamNG.drive.exe" ${=GAME_ARGS} ${=EXTRA_ARGS} >> "$LOG" 2>&1
+if [ "$BEAMMP" = 1 ] || [ "$EARTH" = 1 ]; then
+  # BeamNG.drive.exe hands over to BeamNG.drive.x64.exe: wait for the game itself, then stop the helpers
+  for i in {1..60}; do pgrep -f "BeamNG.drive.x64.exe" >/dev/null && break; sleep 1; done
+  while pgrep -f "BeamNG.drive.x64.exe" >/dev/null; do sleep 2; done
+  stop_helpers
+fi
 "$W/bin/wineserver" -w

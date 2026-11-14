@@ -7,12 +7,13 @@ WORK=$(mktemp -d)
 APP="$WORK/BeamNG Launcher.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 swiftc -parse-as-library -swift-version 5 -O -target arm64-apple-macos14 \
-  -framework SwiftUI -framework AppKit -framework IOKit -framework GameController \
+  -framework SwiftUI -framework AppKit -framework IOKit -framework GameController -framework CryptoKit \
   Sources/main.swift -o "$APP/Contents/MacOS/BeamNGLauncher"
 ditto --norsrc --noextattr Resources/Info.plist "$APP/Contents/Info.plist"
 ditto --norsrc --noextattr Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 ditto --norsrc --noextattr Resources/scripts "$APP/Contents/Resources/scripts"
 ditto --norsrc --noextattr Resources/noFogFix "$APP/Contents/Resources/noFogFix"
+for l in Resources/*.lproj(N); do ditto --norsrc --noextattr "$l" "$APP/Contents/Resources/${l:t}"; done
 chmod +x "$APP/Contents/Resources/scripts/"*.sh
 xattr -cr "$APP"
 codesign --force --deep -s - "$APP"
