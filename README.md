@@ -1,5 +1,7 @@
 # BeamNG Launcher for Mac
 
+<p align="center"><a href="https://ko-fi.com/j0di3x"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-FF5E5B?logo=kofi&logoColor=white&style=for-the-badge" alt="Buy me a coffee on Ko-fi"></a></p>
+
 A small, native macOS launcher that runs **BeamNG.drive** on Apple silicon through Wine and Apple's
 **Game Porting Toolkit 4** (D3DMetal 4), with no GameHub window and no Steam needed to play.
 
