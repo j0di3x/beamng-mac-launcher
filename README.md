@@ -55,6 +55,8 @@ See the [comparison](#gamehub-vs-launcher) below.
   [EarthNG](https://github.com/Alezx311/earthng), see [below](#real-world-maps-experimental)
 - **Discord status:** friends see "Playing BeamNG.drive" with your map, car and play time, like on
   Windows (see [Discord](#discord-status))
+- **Update check:** once a day it looks for a newer release on GitHub and offers to download it
+  (*BeamNG Launcher → Check for Updates…* checks now). Nothing is installed without you
 - **13 languages:** the launcher itself and a game language picker, in every language BeamNG ships:
   English, Deutsch, Español (España), Español (Latinoamérica), Français, 日本語, 한국어, Polski,
   Português (Brasil), Português (Portugal), Русский, 简体中文, 繁體中文

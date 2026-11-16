@@ -1777,6 +1777,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
+        UpdateChecker.shared.start(repo: "j0di3x/beamng-mac-launcher", appName: "BeamNG Launcher")
         // for README screenshots: BeamNGLauncher -windowHeight 900
         let h = UserDefaults.standard.double(forKey: "windowHeight")
         guard h > 0 else { return }
@@ -1798,6 +1799,11 @@ struct BeamNGLauncherApp: App {
         }
         .defaultSize(width: 460, height: 560)
         .windowResizability(.contentSize)
-        .commands { CommandGroup(replacing: .newItem) {} }
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+            CommandGroup(after: .appInfo) {
+                Button(L("Check for Updates…")) { Task { await UpdateChecker.shared.check(manual: true) } }
+            }
+        }
     }
 }

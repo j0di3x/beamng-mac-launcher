@@ -179,5 +179,14 @@
  "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.": "DXVK 將 DirectX 11 轉換為 Vulkan，MoltenVK 再轉換為 Metal。首次駕駛時會因產生著色器而頓挫。",
  "Downloads DXVK (2.8 MB) the first time.": "首次使用時下載 DXVK（2.8 MB）。",
  "BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.": "BeamNG 自己的 Vulkan 渲染器，執行於 MoltenVK。實驗性：使用目前的 Wine 時啟動即當機；如發生請切換回去。",
- "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "遊戲預設的 DirectX 12 渲染器，執行於 Apple D3DMetal。測試最完整。"
+ "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "遊戲預設的 DirectX 12 渲染器，執行於 Apple D3DMetal。測試最完整。",
+ "%@ is up to date": "%@ 已是最新版本",
+ "You have the newest version, %@.": "你使用的是最新版本 %@。",
+ "Couldn't check for updates": "無法檢查更新",
+ "GitHub didn't answer. Check your internet connection and try again.": "GitHub 沒有回應。請檢查網路連線後再試一次。",
+ "%@ %@ is available": "%@ %@ 現已推出",
+ "You have %@. Download the new version, open it and drag %@ onto Applications to replace this one. Your settings are kept.": "你目前的版本是 %@。下載新版本，打開後將 %@ 拖到「應用程式」以取代目前版本。你的設定會保留。",
+ "Download": "下載",
+ "Skip This Version": "略過此版本",
+ "Check for Updates…": "檢查更新…"
 }
