@@ -1395,13 +1395,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
         UpdateChecker.shared.start(repo: "j0di3x/beamng-mac-launcher", appName: "BeamNG Launcher")
-        // for README screenshots: BeamNGLauncher -windowHeight 900
-        let h = UserDefaults.standard.double(forKey: "windowHeight")
-        guard h > 0 else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            guard let w = NSApp.windows.first(where: { $0.isVisible }) else { return }
-            var f = w.frame; f.origin.y += f.height - h; f.size.height = h
-            w.setFrame(f, display: true)
+        NSWindow.allowsAutomaticWindowTabbing = false
+        lockWindows()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self.lockWindows() }
+        NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: nil, queue: .main) { _ in
+            Task { @MainActor in self.lockWindows() }
+        }
+    }
+
+    /// The window is a fixed 980 × 600: no resizing, no zoom, no full screen.
+    @MainActor func lockWindows() {
+        for w in NSApp.windows where w.styleMask.contains(.titled) {
+            w.styleMask.remove(.resizable)
+            w.collectionBehavior.remove(.fullScreenPrimary)
+            w.collectionBehavior.insert(.fullScreenNone)
+            w.standardWindowButton(.zoomButton)?.isEnabled = false
         }
     }
 }
@@ -1415,7 +1423,7 @@ struct BeamNGLauncherApp: App {
             ContentView().environmentObject(model)
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 940, height: 960)
+        .defaultSize(width: 980, height: 600)
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .newItem) {}

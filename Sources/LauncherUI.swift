@@ -25,7 +25,8 @@ struct Card<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) { content }
             .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // fills its grid cell, so cards side by side are the same height
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.card))
             .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(Theme.stroke))
     }
@@ -136,6 +137,11 @@ struct ContentView: View {
         }
     }
 
+    static let titleBarHeight: CGFloat = {
+        let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 100, height: 100), styleMask: [.titled], backing: .buffered, defer: true)
+        return w.frame.height - w.contentLayoutRect.height
+    }()
+
     var body: some View {
         HStack(spacing: 0) {
             sidebar
@@ -146,8 +152,9 @@ struct ContentView: View {
             }
             .background(Theme.main)
         }
-        .frame(width: 940)
-        .frame(minHeight: 640, idealHeight: 960, maxHeight: .infinity)
+        // 600 tall in all: the content also fills the (hidden) title bar, which macOS adds on top
+        .frame(width: 980, height: 600)
+        .frame(width: 980, height: 600 - Self.titleBarHeight, alignment: .top)
         .ignoresSafeArea(.container, edges: .top)
     }
 
@@ -222,48 +229,45 @@ struct ContentView: View {
         .help(on ? L("Running") : L("Starting…"))
     }
 
-    @State private var scrollTarget: Page? = nil
+    func go(_ p: Page) { page = p }
 
-    func go(_ p: Page) {
-        withAnimation(.easeInOut(duration: 0.15)) { page = p }
-        if p != .advanced { scrollTarget = p }
-    }
-
-    // MARK: overview (Play, Graphics, Controllers, Language)
+    // MARK: tabs (Play, Graphics, Controllers + Language)
 
     var overviewPage: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 26) {
-                    header.id(Page.play)
-                    if !m.setupComplete { setupCard }
-                    if !m.pendingChanges.isEmpty { pendingBanner }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                header
+                if !m.setupComplete { setupCard }
+                if !m.pendingChanges.isEmpty { pendingBanner }
+                switch page {
+                case .play:
                     VStack(alignment: .leading, spacing: 8) { SectionTitle(L("Play")); playCard }
-                    VStack(alignment: .leading, spacing: 8) { SectionTitle(L("Graphics")); graphicsCard }.id(Page.graphics)
-                    HStack(alignment: .top, spacing: 16) {
-                        VStack(alignment: .leading, spacing: 8) {
+                case .graphics:
+                    VStack(alignment: .leading, spacing: 8) { SectionTitle(L("Graphics")); graphicsCard }
+                default:
+                    // Controllers and Language share one tab, side by side, cards the same height
+                    Grid(alignment: .topLeading, horizontalSpacing: 16, verticalSpacing: 8) {
+                        GridRow {
                             SectionTitle(L("Controllers"), trailing: AnyView(
                                 Button { m.refreshDevices() } label: { Image(systemName: "arrow.clockwise").font(.caption) }
                                     .buttonStyle(.borderless).help(L("Scan again"))))
+                            SectionTitle(L("Language"))
+                        }
+                        GridRow {
                             controllersCard
-                        }.id(Page.controllers)
-                        VStack(alignment: .leading, spacing: 8) { SectionTitle(L("Language")); languageCard }.id(Page.language)
+                            languageCard
+                        }
                     }
                 }
-                .padding(.horizontal, 30).padding(.top, 34).padding(.bottom, 28)
             }
-            .onChange(of: scrollTarget) { target in
-                guard let target else { return }
-                withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(target, anchor: .top) }
-                scrollTarget = nil
-            }
+            .padding(.horizontal, 30).padding(.top, 30).padding(.bottom, 24)
         }
     }
 
     var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(headline).font(.system(size: 27, weight: .bold))
+                Text(headline).font(.system(size: 25, weight: .bold))
                 Text(summary).font(.system(size: 12.5)).foregroundStyle(.secondary)
             }
             Spacer()
@@ -583,7 +587,6 @@ struct ContentView: View {
                 Caption(L("BeamNG saw last time: %@", m.seenByGame.joined(separator: ", ")))
             }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     func deviceLine(ok: Bool, title: String, items: [String]) -> some View {
@@ -605,7 +608,6 @@ struct ContentView: View {
                 PopUp(selection: Binding(get: { launcherLanguage }, set: { launcherLanguage = $0; m.setLauncherLanguage($0) }), options: launcherLanguageOptions)
             }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     // MARK: advanced page
@@ -615,7 +617,7 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 26) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(L("Advanced")).font(.system(size: 27, weight: .bold))
+                        Text(L("Advanced")).font(.system(size: 25, weight: .bold))
                         Text(L("Compatibility switches and maintenance tools")).font(.system(size: 12.5)).foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -675,7 +677,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .padding(.horizontal, 30).padding(.top, 34).padding(.bottom, 28)
+            .padding(.horizontal, 30).padding(.top, 30).padding(.bottom, 24)
         }
     }
 
