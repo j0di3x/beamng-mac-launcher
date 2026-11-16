@@ -188,5 +188,11 @@
  "You have %@. Download the new version, open it and drag %@ onto Applications to replace this one. Your settings are kept.": "你目前的版本是 %@。下載新版本，打開後將 %@ 拖到「應用程式」以取代目前版本。你的設定會保留。",
  "Download": "下載",
  "Skip This Version": "略過此版本",
- "Check for Updates…": "檢查更新…"
+ "Check for Updates…": "檢查更新…",
+ "The game window will cover all displays from the next start.": "下次啟動時，遊戲視窗將覆蓋所有顯示器。",
+ "Span all displays": "延伸到所有顯示器",
+ "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "只連接了一台顯示器。再連接一台後，遊戲視窗會覆蓋兩台；在此之前會填滿這一台。",
+ "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "只要「顯示器有獨立的空間」為開啟狀態，macOS 就會把每個視窗限制在一台顯示器上。請在「桌面與 Dock」（靠下方的「指揮中心」部分）中關閉，然後登出並重新登入。",
+ "Open Desktop & Dock Settings": "打開「桌面與 Dock」設定",
+ "The game window covers %ld displays: %ld × %ld.": "遊戲視窗覆蓋 %ld 台顯示器：%ld × %ld。"
 }

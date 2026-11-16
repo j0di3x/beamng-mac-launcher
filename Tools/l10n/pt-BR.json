@@ -188,5 +188,11 @@
  "You have %@. Download the new version, open it and drag %@ onto Applications to replace this one. Your settings are kept.": "Você tem a %@. Baixe a nova versão, abra-a e arraste %@ para Aplicativos para substituir esta. Suas configurações são mantidas.",
  "Download": "Baixar",
  "Skip This Version": "Pular esta versão",
- "Check for Updates…": "Verificar atualizações…"
+ "Check for Updates…": "Verificar atualizações…",
+ "The game window will cover all displays from the next start.": "A janela do jogo vai cobrir todas as telas a partir da próxima abertura.",
+ "Span all displays": "Estender por todas as telas",
+ "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "Só uma tela está conectada. Conecte outra e a janela do jogo cobre as duas; até lá, ela preenche esta.",
+ "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "O macOS mantém cada janela em uma tela enquanto \"Monitores têm Spaces separados\" estiver ativado. Desative em Mesa e Dock (perto do fim, em Mission Control) e depois saia da sessão e entre de novo.",
+ "Open Desktop & Dock Settings": "Abrir ajustes de Mesa e Dock",
+ "The game window covers %ld displays: %ld × %ld.": "A janela do jogo cobre %ld telas: %ld × %ld."
 }

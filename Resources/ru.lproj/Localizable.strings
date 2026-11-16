@@ -13,6 +13,7 @@
 "Saved your queued changes." = "Отложенные изменения сохранены.";
 "Saved. Takes effect next time the game starts." = "Сохранено. Вступит в силу при следующем запуске игры.";
 "The game is running — changes apply when it restarts." = "Игра запущена — изменения вступят в силу после перезапуска.";
+"The game window will cover all displays from the next start." = "Со следующего запуска окно игры займёт все мониторы.";
 "Fit screen (%ld × %ld)" = "По размеру экрана (%ld × %ld)";
 "Quit the game first to change mods." = "Чтобы изменить моды, сначала закройте игру.";
 "Fog fix turned on." = "Исправление тумана включено.";
@@ -125,6 +126,7 @@
 "Window" = "Окно";
 "Full screen (borderless)" = "Полный экран (без рамки)";
 "Full screen (exclusive)" = "Полный экран (эксклюзивный)";
+"Span all displays" = "На все мониторы";
 "Window size" = "Размер окна";
 "Full screen covers the Dock and menu bar while you play." = "Полноэкранный режим закрывает Dock и строку меню во время игры.";
 "Resolution scale" = "Масштаб разрешения";
@@ -135,6 +137,10 @@
 "Show FPS counter" = "Показывать счётчик FPS";
 "FPS counter on from the next start." = "Счётчик FPS включится со следующего запуска.";
 "FPS counter off from the next start." = "Счётчик FPS выключится со следующего запуска.";
+"Only one display is connected. Connect another and the game window covers both; until then it fills this one." = "Подключён только один монитор. Подключите ещё один, и окно игры займёт оба; пока что оно заполняет этот.";
+"macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in." = "macOS держит каждое окно на одном мониторе, пока включён параметр «Мониторы с разными пространствами Spaces». Выключите его в настройках «Рабочий стол и Dock» (внизу, в разделе Mission Control), затем выйдите из системы и войдите снова.";
+"Open Desktop & Dock Settings" = "Открыть настройки «Рабочий стол и Dock»";
+"The game window covers %ld displays: %ld × %ld." = "Окно игры занимает мониторов: %ld, %ld × %ld.";
 "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different." = "Рендерер DirectX 11 игры на Apple D3DMetal. Старее и проще; некоторые эффекты выглядят иначе.";
 "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build." = "DirectX 11 переводится в Vulkan через DXVK, затем в Metal через MoltenVK. Первая поездка подтормаживает, пока создаются шейдеры.";
 "Downloads DXVK (2.8 MB) the first time." = "В первый раз скачивает DXVK (2,8 МБ).";

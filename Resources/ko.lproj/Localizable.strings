@@ -13,6 +13,7 @@
 "Saved your queued changes." = "대기 중이던 변경 사항을 저장했습니다.";
 "Saved. Takes effect next time the game starts." = "저장했습니다. 다음에 게임을 시작할 때 적용됩니다.";
 "The game is running — changes apply when it restarts." = "게임이 실행 중입니다. 변경 사항은 재시작 후 적용됩니다.";
+"The game window will cover all displays from the next start." = "다음 실행부터 게임 창이 모든 디스플레이를 덮습니다.";
 "Fit screen (%ld × %ld)" = "화면에 맞춤 (%ld × %ld)";
 "Quit the game first to change mods." = "모드를 변경하려면 먼저 게임을 종료하세요.";
 "Fog fix turned on." = "안개 수정을 켰습니다.";
@@ -125,6 +126,7 @@
 "Window" = "창";
 "Full screen (borderless)" = "전체 화면 (테두리 없음)";
 "Full screen (exclusive)" = "전체 화면 (전용)";
+"Span all displays" = "모든 디스플레이로 확장";
 "Window size" = "창 크기";
 "Full screen covers the Dock and menu bar while you play." = "전체 화면에서는 플레이하는 동안 Dock과 메뉴 막대가 가려집니다.";
 "Resolution scale" = "해상도 배율";
@@ -135,6 +137,10 @@
 "Show FPS counter" = "FPS 표시";
 "FPS counter on from the next start." = "다음 시작부터 FPS를 표시합니다.";
 "FPS counter off from the next start." = "다음 시작부터 FPS를 숨깁니다.";
+"Only one display is connected. Connect another and the game window covers both; until then it fills this one." = "디스플레이가 하나만 연결되어 있습니다. 하나를 더 연결하면 게임 창이 둘 다 덮고, 그때까지는 이 디스플레이를 채웁니다.";
+"macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in." = "'디스플레이마다 별도의 스페이스 사용'이 켜져 있으면 macOS는 창을 한 디스플레이에만 둡니다. 데스크탑 및 Dock(아래쪽 Mission Control)에서 끈 다음 로그아웃했다가 다시 로그인하세요.";
+"Open Desktop & Dock Settings" = "데스크탑 및 Dock 설정 열기";
+"The game window covers %ld displays: %ld × %ld." = "게임 창이 디스플레이 %ld개를 덮습니다: %ld × %ld.";
 "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different." = "Apple D3DMetal에서 실행되는 게임의 DirectX 11 렌더러. 더 오래되고 단순하며 일부 효과가 다르게 보입니다.";
 "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build." = "DXVK가 DirectX 11을 Vulkan으로, MoltenVK가 Metal로 변환합니다. 셰이더를 만드는 동안 첫 주행이 끊깁니다.";
 "Downloads DXVK (2.8 MB) the first time." = "처음에는 DXVK(2.8MB)를 다운로드합니다.";

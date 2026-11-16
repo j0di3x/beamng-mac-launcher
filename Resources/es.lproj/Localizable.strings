@@ -13,6 +13,7 @@
 "Saved your queued changes." = "Se han guardado los cambios pendientes.";
 "Saved. Takes effect next time the game starts." = "Guardado. Se aplicará la próxima vez que inicies el juego.";
 "The game is running — changes apply when it restarts." = "El juego está abierto: los cambios se aplicarán al reiniciarlo.";
+"The game window will cover all displays from the next start." = "La ventana del juego cubrirá todas las pantallas desde el próximo inicio.";
 "Fit screen (%ld × %ld)" = "Ajustar a la pantalla (%ld × %ld)";
 "Quit the game first to change mods." = "Cierra primero el juego para cambiar los mods.";
 "Fog fix turned on." = "Corrección de niebla activada.";
@@ -125,6 +126,7 @@
 "Window" = "Ventana";
 "Full screen (borderless)" = "Pantalla completa (sin bordes)";
 "Full screen (exclusive)" = "Pantalla completa (exclusiva)";
+"Span all displays" = "Extender a todas las pantallas";
 "Window size" = "Tamaño de ventana";
 "Full screen covers the Dock and menu bar while you play." = "La pantalla completa tapa el Dock y la barra de menús mientras juegas.";
 "Resolution scale" = "Escala de resolución";
@@ -135,6 +137,10 @@
 "Show FPS counter" = "Mostrar contador de FPS";
 "FPS counter on from the next start." = "Contador de FPS activado desde el próximo inicio.";
 "FPS counter off from the next start." = "Contador de FPS desactivado desde el próximo inicio.";
+"Only one display is connected. Connect another and the game window covers both; until then it fills this one." = "Solo hay una pantalla conectada. Conecta otra y la ventana del juego cubrirá ambas; mientras tanto, llena esta.";
+"macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in." = "macOS mantiene cada ventana en una sola pantalla mientras «Las pantallas tienen espacios independientes» esté activado. Desactívalo en Escritorio y Dock (abajo, en Mission Control) y luego cierra sesión y vuelve a entrar.";
+"Open Desktop & Dock Settings" = "Abrir ajustes de Escritorio y Dock";
+"The game window covers %ld displays: %ld × %ld." = "La ventana del juego cubre %ld pantallas: %ld × %ld.";
 "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different." = "El renderizador DirectX 11 del juego sobre Apple D3DMetal. Más antiguo y sencillo; algunos efectos se ven distintos.";
 "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build." = "DirectX 11 traducido a Vulkan por DXVK y luego a Metal por MoltenVK. La primera partida va a tirones mientras se crean los shaders.";
 "Downloads DXVK (2.8 MB) the first time." = "Descarga DXVK (2,8 MB) la primera vez.";

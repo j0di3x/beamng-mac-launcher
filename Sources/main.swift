@@ -89,6 +89,7 @@ struct LauncherConfig {
     var earth = false
     var discord = true
     var renderer = "d3d12"   // d3d12, d3d11, vulkan, dxvk
+    var span = false         // stretch the game window across all displays
 
     static func load() -> LauncherConfig {
         var c = LauncherConfig()
@@ -110,6 +111,7 @@ struct LauncherConfig {
             case "BEAMMP": c.beammp = val == "1"
             case "EARTH": c.earth = val == "1"
             case "DISCORD": c.discord = val != "0"
+            case "SPAN": c.span = val == "1"
             case "RENDERER": c.renderer = ["d3d12", "d3d11", "vulkan", "dxvk"].contains(val) ? val : "d3d12"
             default: break
             }
@@ -131,6 +133,7 @@ struct LauncherConfig {
         EARTH=\(earth ? 1 : 0)
         DISCORD=\(discord ? 1 : 0)
         RENDERER=\(renderer)
+        SPAN=\(span ? 1 : 0)
 
         """
         try? FileManager.default.createDirectory(at: Paths.root, withIntermediateDirectories: true)
@@ -504,6 +507,7 @@ final class Launcher: ObservableObject {
     @Published var meshes = "Normal"
     @Published var windowRes = "1280 720"
     @Published var displayMode = "Window"
+    @Published var screensTick = 0      // bumps when displays are added, removed or rearranged
     @Published var pendingChanges: [String: Any] = [:]
     @Published var fogFix = false
     @Published var gameLanguage = ""
@@ -577,6 +581,9 @@ final class Launcher: ObservableObject {
         refreshAll()
         tick()
         Task { await checkAddonUpdates() }
+        NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.screensTick += 1 }
+        }
         timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick() }
         }
@@ -669,7 +676,7 @@ final class Launcher: ObservableObject {
         shadows = "\(v("GraphicShadowsQuality") ?? "Normal")"
         meshes = "\(v("GraphicMeshQuality") ?? "Normal")"
         windowRes = "\(v("GraphicDisplayResolutions") ?? "1280 720")"
-        displayMode = "\(v("GraphicDisplayModes") ?? "Window")"
+        displayMode = conf.span ? "Span" : "\(v("GraphicDisplayModes") ?? "Window")"
         gameLanguage = s["userLanguage"] as? String ?? ""
     }
 
@@ -729,6 +736,12 @@ final class Launcher: ObservableObject {
     }
 
     func setDisplayMode(_ mode: String) {
+        if mode == "Span" {
+            conf.span = true; conf.save(); displayMode = "Span"
+            message = L("The game window will cover all displays from the next start.")
+            return
+        }
+        if conf.span { conf.span = false; conf.save() }
         if mode == "Window" {
             var res = windowRes
             if displayMode != "Window", let f = NSScreen.main?.visibleFrame { res = "\(Int(f.width)) \(Int(f.height) - 28)" }
@@ -756,6 +769,72 @@ final class Launcher: ObservableObject {
         guard parts.count == 2 else { return "" }
         let s = aaType == "fsr3" ? renderScale : 1
         return "\(Int((parts[0] * s).rounded())) × \(Int((parts[1] * s).rounded()))"
+    }
+
+    // MARK: span all displays
+
+    struct SpanArea { let x, y, w, h: Int }
+
+    /// The largest rectangle one window can cover across all displays, in Windows coordinates (Wine's Mac
+    /// driver: points, top-left of the menu-bar display is 0,0, y grows down). Side-by-side displays give
+    /// their full width at the height they share; stacked ones the reverse. A single display gives its own visible area.
+    static func spanArea() -> SpanArea? {
+        let screens = NSScreen.screens
+        guard let main = screens.first else { return nil }
+        if screens.count == 1 {      // one display: fill it, like "Fit screen"
+            let v = main.visibleFrame
+            return SpanArea(x: Int(v.minX), y: Int(main.frame.maxY - v.maxY), w: Int(v.width), h: Int(v.height))
+        }
+        let top = main.frame.maxY
+        let r = screens.map { s -> CGRect in
+            let v = s.visibleFrame
+            return CGRect(x: v.minX, y: top - v.maxY, width: v.width, height: v.height)
+        }
+        let minX = r.map(\.minX).min()!, maxX = r.map(\.maxX).max()!
+        let minY = r.map(\.minY).min()!, maxY = r.map(\.maxY).max()!
+        var a = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+        // the arrangement comes from the whole screens (visible areas have menu bar and Dock gaps)
+        let f = screens.map(\.frame)
+        let fw = f.map(\.maxX).max()! - f.map(\.minX).min()!, fh = f.map(\.maxY).max()! - f.map(\.minY).min()!
+        if abs(f.map(\.width).reduce(0, +) - fw) < 8 {                 // side by side
+            let t = r.map(\.minY).max()!, b = r.map(\.maxY).min()!
+            if b - t > 200 { a = CGRect(x: minX, y: t, width: maxX - minX, height: b - t) }
+        } else if abs(f.map(\.height).reduce(0, +) - fh) < 8 {         // stacked
+            let l = r.map(\.minX).max()!, rt = r.map(\.maxX).min()!
+            if rt - l > 200 { a = CGRect(x: l, y: minY, width: rt - l, height: maxY - minY) }
+        }
+        return SpanArea(x: Int(a.minX), y: Int(a.minY), w: Int(a.width), h: Int(a.height))
+    }
+
+    /// macOS only lets a window cover several displays when "Displays have separate Spaces" is off.
+    static var displaysShareSpace: Bool {
+        UserDefaults(suiteName: "com.apple.spaces")?.bool(forKey: "spans-displays") ?? false
+    }
+
+    static func openSpacesSetting() {
+        if let u = URL(string: "x-apple.systempreferences:com.apple.Desktop-Settings.extension") { NSWorkspace.shared.open(u) }
+    }
+
+    /// Before each start: a window the size of all displays, placed at their top-left. BeamNG restores
+    /// WindowPlacement ("flags show minX minY maxX maxY left top bottom right", relative to the main
+    /// display's work area) when it opens in window mode.
+    func applySpan() {
+        guard conf.span, let a = Launcher.spanArea() else { return }
+        let s = GameSettingsFile.load()
+        // window frame (title bar and borders) from the last placement BeamNG saved, else Wine's usual one
+        var frameW = 8, frameH = 34, insetL = 4, insetT = 7
+        let old = (s["WindowPlacement"] as? String ?? "").split(separator: " ").compactMap { Int($0) }
+        let res = (s["GraphicDisplayResolutions"] as? String ?? "").split(separator: " ").compactMap { Int($0) }
+        if old.count == 10, res.count == 2, "\(s["GraphicDisplayModes"] ?? "")" == "Window" {
+            let fw = (old[9] - old[6]) - res[0], fh = (old[8] - old[7]) - res[1]
+            if (0...40).contains(fw), (0...80).contains(fh) { frameW = fw; frameH = fh; insetL = fw / 2; insetT = min(fh, 7) }
+        }
+        let work = NSScreen.screens.first.map { m in (Int(m.visibleFrame.minX), Int(m.frame.maxY - m.visibleFrame.maxY)) } ?? (0, 0)
+        let left = a.x - work.0 - insetL, top = a.y - work.1 - insetT
+        let placement = "0 1 -1 -1 -1 -1 \(left) \(top) \(top + a.h + insetT) \(left + a.w + 2 * insetL)"
+        GameSettingsFile.merge(["GraphicDisplayModes": "Window",
+                                "GraphicDisplayResolutions": "\(a.w - frameW + 2 * insetL) \(a.h - frameH + insetT)",
+                                "WindowPlacement": placement])
     }
 
     func setWindow(_ res: String) {
@@ -1163,6 +1242,7 @@ final class Launcher: ObservableObject {
         conf.save()
         if conf.beammp { writeBeamNGIni() }
         if !pendingChanges.isEmpty { GameSettingsFile.merge(pendingChanges); pendingChanges = [:] }
+        applySpan()
         runShell(Paths.bin.appendingPathComponent("launch.sh"), wait: false)
         state = .starting; lastState = .starting
         message = L("Starting BeamNG…")
@@ -1562,9 +1642,13 @@ struct ContentView: View {
                         Text(L("Window")).tag("Window")
                         Text(L("Full screen (borderless)")).tag("Borderless")
                         Text(L("Full screen (exclusive)")).tag("Fullscreen")
+                        Text(L("Span all displays")).tag("Span")
                     }.labelsHidden().frame(width: 220)
                 }
-                if m.displayMode == "Window" {
+                if m.displayMode == "Span" { spanNote }
+                if m.displayMode == "Span" {
+                    EmptyView()
+                } else if m.displayMode == "Window" {
                     LabeledContent(L("Window size")) {
                         Picker("", selection: Binding(get: { m.windowRes }, set: { m.setWindow($0) })) {
                             ForEach(m.windowChoices, id: \.0) { Text($0.1).tag($0.0) }
@@ -1603,6 +1687,20 @@ struct ContentView: View {
                 }))
             }
             .padding(6)
+        }
+    }
+
+    @ViewBuilder var spanNote: some View {
+        let _ = m.screensTick
+        if NSScreen.screens.count < 2 {
+            Caption(L("Only one display is connected. Connect another and the game window covers both; until then it fills this one."))
+        } else if !Launcher.displaysShareSpace {
+            VStack(alignment: .leading, spacing: 6) {
+                Caption(L("macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in."))
+                Button(L("Open Desktop & Dock Settings")) { Launcher.openSpacesSetting() }.controlSize(.small)
+            }
+        } else if let a = Launcher.spanArea() {
+            Caption(L("The game window covers %ld displays: %ld × %ld.", NSScreen.screens.count, a.w, a.h))
         }
     }
 

@@ -31,6 +31,10 @@ See the [comparison](#gamehub-vs-launcher) below.
 
 - **Play / Quit / Restart** with live game status
 - **Graphics:** BeamNG's official presets (read from your game folder), window size, FPS counter (Metal HUD)
+- **Span all displays:** *Display → Span all displays* stretches the game window across every
+  connected screen (side by side or stacked), measured again at each start. macOS needs
+  *System Settings → Desktop & Dock → Displays have separate Spaces* turned off for this (then log
+  out and back in); the launcher links straight to that setting
 - **Potato mode:** goes below the game's Lowest preset for older or 8 GB Macs: renders at half
   resolution with FSR 3, caps at 30 FPS, turns every effect off and removes parked cars (each one is a
   full physics vehicle). Your previous settings are backed up first, and switching it off restores

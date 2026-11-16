@@ -13,6 +13,7 @@
 "Saved your queued changes." = "保留中の変更を保存しました。";
 "Saved. Takes effect next time the game starts." = "保存しました。次回ゲーム起動時に反映されます。";
 "The game is running — changes apply when it restarts." = "ゲーム実行中です。変更は再起動後に反映されます。";
+"The game window will cover all displays from the next start." = "次回の起動から、ゲームのウインドウがすべてのディスプレイに広がります。";
 "Fit screen (%ld × %ld)" = "画面に合わせる (%ld × %ld)";
 "Quit the game first to change mods." = "MODを変更するには、先にゲームを終了してください。";
 "Fog fix turned on." = "霧の修正をオンにしました。";
@@ -125,6 +126,7 @@
 "Window" = "ウインドウ";
 "Full screen (borderless)" = "フルスクリーン（ボーダーレス）";
 "Full screen (exclusive)" = "フルスクリーン（排他）";
+"Span all displays" = "すべてのディスプレイに広げる";
 "Window size" = "ウインドウサイズ";
 "Full screen covers the Dock and menu bar while you play." = "フルスクリーン中はDockとメニューバーが隠れます。";
 "Resolution scale" = "解像度スケール";
@@ -135,6 +137,10 @@
 "Show FPS counter" = "FPSカウンタを表示";
 "FPS counter on from the next start." = "次回の起動からFPSカウンタを表示します。";
 "FPS counter off from the next start." = "次回の起動からFPSカウンタを非表示にします。";
+"Only one display is connected. Connect another and the game window covers both; until then it fills this one." = "接続されているディスプレイは 1 台です。もう 1 台つなぐとゲームのウインドウが両方に広がります。それまではこのディスプレイいっぱいに表示されます。";
+"macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in." = "「ディスプレイごとに個別の操作スペース」がオンのあいだ、macOS はウインドウを 1 台のディスプレイに収めます。「デスクトップとDock」（下のほうの Mission Control）でオフにしてから、ログアウトして再度ログインしてください。";
+"Open Desktop & Dock Settings" = "「デスクトップとDock」設定を開く";
+"The game window covers %ld displays: %ld × %ld." = "ゲームのウインドウは %ld 台のディスプレイに広がります：%ld × %ld。";
 "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different." = "Apple D3DMetal 上で動くゲームの DirectX 11 レンダラー。古くシンプルで、一部のエフェクトの見た目が異なります。";
 "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build." = "DirectX 11 を DXVK が Vulkan に、MoltenVK が Metal に変換します。最初の走行はシェーダー作成中にカクつきます。";
 "Downloads DXVK (2.8 MB) the first time." = "初回は DXVK（2.8 MB）をダウンロードします。";

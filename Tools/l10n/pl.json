@@ -188,5 +188,11 @@
  "You have %@. Download the new version, open it and drag %@ onto Applications to replace this one. Your settings are kept.": "Masz wersję %@. Pobierz nową wersję, otwórz ją i przeciągnij %@ do folderu Aplikacje, aby zastąpić tę. Ustawienia zostaną zachowane.",
  "Download": "Pobierz",
  "Skip This Version": "Pomiń tę wersję",
- "Check for Updates…": "Sprawdź aktualizacje…"
+ "Check for Updates…": "Sprawdź aktualizacje…",
+ "The game window will cover all displays from the next start.": "Od następnego uruchomienia okno gry obejmie wszystkie ekrany.",
+ "Span all displays": "Rozciągnij na wszystkie ekrany",
+ "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "Podłączony jest tylko jeden ekran. Podłącz kolejny, a okno gry obejmie oba; do tego czasu wypełnia ten.",
+ "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "macOS trzyma każde okno na jednym ekranie, dopóki włączona jest opcja „Ekrany mają oddzielne przestrzenie”. Wyłącz ją w ustawieniach Biurko i Dock (na dole, w sekcji Mission Control), a potem wyloguj się i zaloguj ponownie.",
+ "Open Desktop & Dock Settings": "Otwórz ustawienia Biurko i Dock",
+ "The game window covers %ld displays: %ld × %ld.": "Okno gry obejmuje ekrany: %ld, %ld × %ld."
 }

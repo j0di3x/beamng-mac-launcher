@@ -188,5 +188,11 @@
  "You have %@. Download the new version, open it and drag %@ onto Applications to replace this one. Your settings are kept.": "У вас версия %@. Скачайте новую версию, откройте её и перетащите %@ в «Программы», чтобы заменить эту. Настройки сохранятся.",
  "Download": "Скачать",
  "Skip This Version": "Пропустить эту версию",
- "Check for Updates…": "Проверить обновления…"
+ "Check for Updates…": "Проверить обновления…",
+ "The game window will cover all displays from the next start.": "Со следующего запуска окно игры займёт все мониторы.",
+ "Span all displays": "На все мониторы",
+ "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "Подключён только один монитор. Подключите ещё один, и окно игры займёт оба; пока что оно заполняет этот.",
+ "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "macOS держит каждое окно на одном мониторе, пока включён параметр «Мониторы с разными пространствами Spaces». Выключите его в настройках «Рабочий стол и Dock» (внизу, в разделе Mission Control), затем выйдите из системы и войдите снова.",
+ "Open Desktop & Dock Settings": "Открыть настройки «Рабочий стол и Dock»",
+ "The game window covers %ld displays: %ld × %ld.": "Окно игры занимает мониторов: %ld, %ld × %ld."
 }

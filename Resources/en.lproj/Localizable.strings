@@ -13,6 +13,7 @@
 "Saved your queued changes." = "Saved your queued changes.";
 "Saved. Takes effect next time the game starts." = "Saved. Takes effect next time the game starts.";
 "The game is running — changes apply when it restarts." = "The game is running — changes apply when it restarts.";
+"The game window will cover all displays from the next start." = "The game window will cover all displays from the next start.";
 "Fit screen (%ld × %ld)" = "Fit screen (%ld × %ld)";
 "Quit the game first to change mods." = "Quit the game first to change mods.";
 "Fog fix turned on." = "Fog fix turned on.";
@@ -125,6 +126,7 @@
 "Window" = "Window";
 "Full screen (borderless)" = "Full screen (borderless)";
 "Full screen (exclusive)" = "Full screen (exclusive)";
+"Span all displays" = "Span all displays";
 "Window size" = "Window size";
 "Full screen covers the Dock and menu bar while you play." = "Full screen covers the Dock and menu bar while you play.";
 "Resolution scale" = "Resolution scale";
@@ -135,6 +137,10 @@
 "Show FPS counter" = "Show FPS counter";
 "FPS counter on from the next start." = "FPS counter on from the next start.";
 "FPS counter off from the next start." = "FPS counter off from the next start.";
+"Only one display is connected. Connect another and the game window covers both; until then it fills this one." = "Only one display is connected. Connect another and the game window covers both; until then it fills this one.";
+"macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in." = "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.";
+"Open Desktop & Dock Settings" = "Open Desktop & Dock Settings";
+"The game window covers %ld displays: %ld × %ld." = "The game window covers %ld displays: %ld × %ld.";
 "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different." = "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.";
 "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build." = "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.";
 "Downloads DXVK (2.8 MB) the first time." = "Downloads DXVK (2.8 MB) the first time.";
