@@ -56,6 +56,9 @@ See the [comparison](#gamehub-vs-launcher) below.
 - **Advanced:** anti-aliasing (FSR 3 recommended), render scale, sharpness, shadows, meshes
 - **Controllers:** shows a ✓ when a controller or steering wheel is connected (Xbox/PlayStation pads,
   Logitech, Thrustmaster, Fanatec, Moza, Simucube), plus what BeamNG detected last time
+- **Steering wheels:** Wine normally hides wheels it doesn't know, such as the Logitech G29. The
+  launcher tells Wine to pass every connected wheel (and Logitech's PC/PS wheels) straight to the
+  game, so BeamNG sees steering, pedals and buttons. Force feedback isn't passed through yet
 - **Compatibility switches:** missing-objects fix, Metal 4, optional fog-off mod, GPTK version picker
 - **Tools:** clear shader caches, reset to recommended settings (with backup), choose game folder
 - **Multiplayer:** one switch for [BeamMP](https://beammp.com). The launcher downloads the official

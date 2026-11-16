@@ -90,6 +90,7 @@ struct LauncherConfig {
     var discord = true
     var renderer = "d3d12"   // d3d12, d3d11, vulkan, dxvk
     var span = false         // stretch the game window across all displays
+    var hidraw = ""          // wheels Wine should pass through as raw HID, "0x046D/0xC24F,…" (set at each start)
 
     static func load() -> LauncherConfig {
         var c = LauncherConfig()
@@ -112,6 +113,7 @@ struct LauncherConfig {
             case "EARTH": c.earth = val == "1"
             case "DISCORD": c.discord = val != "0"
             case "SPAN": c.span = val == "1"
+            case "HIDRAW": c.hidraw = val
             case "RENDERER": c.renderer = ["d3d12", "d3d11", "vulkan", "dxvk"].contains(val) ? val : "d3d12"
             default: break
             }
@@ -134,6 +136,7 @@ struct LauncherConfig {
         DISCORD=\(discord ? 1 : 0)
         RENDERER=\(renderer)
         SPAN=\(span ? 1 : 0)
+        HIDRAW=\(q(hidraw))
 
         """
         try? FileManager.default.createDirectory(at: Paths.root, withIntermediateDirectories: true)
@@ -1243,6 +1246,12 @@ final class Launcher: ObservableObject {
         guard setupComplete else { message = L("Finish setup first."); return }
         if conf.beammp && !beammpInstalled { conf.beammp = false }
         if conf.earth && !earthInstalled { conf.earth = false }
+        // Wine only passes wheels it knows to the game; tell it about the ones plugged in now
+        devices = ControllerScanner.scan()
+        conf.hidraw = devices.filter { $0.kind == .wheel }.compactMap { d -> String? in
+            let p = d.id.split(separator: ":").compactMap { Int($0, radix: 16) }
+            return p.count == 2 ? String(format: "0x%04X/0x%04X", p[0], p[1]) : nil
+        }.joined(separator: ",")
         conf.save()
         if conf.beammp { writeBeamNGIni() }
         if !pendingChanges.isEmpty { GameSettingsFile.merge(pendingChanges); pendingChanges = [:] }

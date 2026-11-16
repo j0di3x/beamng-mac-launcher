@@ -3,7 +3,7 @@
 # Optional helpers started first, in the same Wine prefix: BeamMP (multiplayer) and BeamNG.Earth (world server).
 R="$HOME/Library/Application Support/BeamNG-GPTK4"
 GAME_DIR=""; GAME_ARGS="-nogfxgpudriven"; EXTRA_ARGS=""; METAL4=1; FPS_HUD=0; GPTK_VERSION=current
-BEAMMP=0; EARTH=0; RENDERER=d3d12
+BEAMMP=0; EARTH=0; RENDERER=d3d12; HIDRAW=""
 [ -f "$R/launcher.conf" ] && source "$R/launcher.conf"
 
 W=$(ls -d "$R"/containers/wine_installations/*(N/) | head -1)
@@ -24,6 +24,12 @@ export PATH="$W/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 [ "$METAL4" = 1 ] && export D3DM_MTL4=1
 [ "$FPS_HUD" = 1 ] && export MTL_HUD_ENABLED=1
+
+# Steering wheels: Wine skips joysticks it doesn't know (e.g. Logitech G29) unless they're listed
+# here; then the game sees them as raw HID devices. Logitech's PC/PS wheels are always listed, plus
+# every wheel the launcher found plugged in (HIDRAW in launcher.conf).
+LOGITECH="0x046D/0xC24F,0x046D/0xC266,0x046D/0xC267,0x046D/0xC29B,0x046D/0xC299,0x046D/0xC29A,0x046D/0xC298,0x046D/0xC294"
+export PROTON_ENABLE_HIDRAW="$LOGITECH${HIDRAW:+,$HIDRAW}"
 
 # Renderer. d3d12/d3d11 go through Apple D3DMetal. vulkan is BeamNG's own Vulkan renderer on
 # MoltenVK (Vulkan on Metal, ships with Wine). dxvk is the game's D3D11 renderer translated to
