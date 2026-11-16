@@ -330,7 +330,7 @@ struct ContentView: View {
                 }
                 Divider()
                 HStack {
-                    CheckRow(ok: m.gameDirOK, title: L("BeamNG.drive folder"), detail: m.gameDirOK ? m.conf.gameDir : L("Not chosen"))
+                    CheckRow(ok: m.gameDirOK, title: L("BeamNG.drive folder"), detail: m.gameDirOK ? (m.conf.gameDir as NSString).abbreviatingWithTildeInPath : L("Not chosen"))
                     Spacer()
                     Button(L("Choose…")) { m.chooseGameDir() }
                 }
@@ -700,7 +700,7 @@ struct ContentView: View {
                         Divider()
                         HStack(spacing: 12) {
                             Button(role: .destructive) { confirmReset() } label: { Text(L("Reset to defaults")).foregroundStyle(.red) }
-                            Text(m.conf.gameDir.isEmpty ? L("No game folder chosen") : m.conf.gameDir)
+                            Text(m.conf.gameDir.isEmpty ? L("No game folder chosen") : (m.conf.gameDir as NSString).abbreviatingWithTildeInPath)
                                 .font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                         }
                     }
@@ -851,7 +851,7 @@ struct OnboardingView: View {
                                 }
                             }
                             Divider()
-                            check(m.gameDirOK, L("BeamNG.drive folder"), m.gameDirOK ? m.conf.gameDir : L("The folder with BeamNG.drive.exe, for example in your Steam library.")) {
+                            check(m.gameDirOK, L("BeamNG.drive folder"), m.gameDirOK ? (m.conf.gameDir as NSString).abbreviatingWithTildeInPath : L("The folder with BeamNG.drive.exe, for example in your Steam library.")) {
                                 if !m.gameDirOK {
                                     Button(L("Find it")) { findGame() }
                                 }
@@ -907,7 +907,7 @@ struct OnboardingView: View {
     func findGame() {
         if let d = Launcher.findGameDir() {
             m.conf.gameDir = d; m.conf.save(); m.loadGraphics()
-            m.message = L("Found BeamNG.drive in %@.", d)
+            m.message = L("Found BeamNG.drive in %@.", (d as NSString).abbreviatingWithTildeInPath)
         } else {
             m.message = L("Couldn't find BeamNG.drive. Choose its folder instead.")
         }

@@ -5,7 +5,7 @@
 A small, native macOS launcher that runs **BeamNG.drive** on Apple silicon through Wine and Apple's
 **Game Porting Toolkit 4** (D3DMetal 4), with no GameHub window and no Steam needed to play.
 
-<p align="center"><img src="docs/screenshots/launcher.png" width="460" alt="The launcher window"></p>
+<p align="center"><img src="docs/screenshots/launcher.png" width="720" alt="The launcher window: sidebar with Play, Graphics, Controllers & Language and Advanced, and the Play tab"></p>
 
 > Unofficial. Not affiliated with BeamNG GmbH, Apple or GameHub. You need your own copy of BeamNG.drive.
 > This repository contains no game files, no Wine build and no Apple software.
@@ -29,8 +29,14 @@ See the [comparison](#gamehub-vs-launcher) below.
 
 ## Features
 
+- **First-run setup:** on first start the launcher checks everything it needs (Apple silicon,
+  Rosetta 2, GameHub's Wine, Apple's Game Porting Toolkit, the BeamNG.drive folder) and gives each
+  missing piece a button to fix it. See [First run](#first-run)
 - **Play / Quit / Restart** with live game status
 - **Graphics:** BeamNG's official presets (read from your game folder), window size, FPS counter (Metal HUD)
+
+  <img src="docs/screenshots/graphics.png" width="640" alt="The Graphics tab: preset, anti-aliasing, sharpness, shadows, meshes, display, window size, resolution scale and renderer">
+
 - **Span all displays:** *Display → Span all displays* stretches the game window across every
   connected screen (side by side or stacked), measured again at each start. macOS needs
   *System Settings → Desktop & Dock → Displays have separate Spaces* turned off for this (then log
@@ -105,13 +111,22 @@ into `dist/`.
 
 ## First run
 
-The launcher shows a setup checklist until all three are done:
+The first time it opens, the launcher walks you through setup. It checks your Mac and shows a green
+tick or an orange mark with a fix for each requirement:
 
-1. **Wine runtime:** click **Import from GameHub**.
-2. **Apple Game Porting Toolkit:** click **Install .dmg…** and pick the Apple download.
-3. **BeamNG.drive folder:** found automatically in common places, or click **Choose…**.
+<img src="docs/screenshots/setup.png" width="640" alt="First-run setup: Apple silicon Mac, Rosetta 2, Wine runtime, Apple Game Porting Toolkit and BeamNG.drive folder, all ticked">
 
-Then press **Play**.
+1. **Apple silicon Mac:** Game Porting Toolkit only runs on M-series chips.
+2. **Rosetta 2:** click **Install** (macOS asks for your password). Wine is an Intel build.
+3. **Wine runtime:** install GameHub and run any Windows game in it once, then click
+   **Import from GameHub**.
+4. **Apple Game Porting Toolkit:** click **Get from Apple**, download *"Evaluation environment for
+   Windows games"*, then **Install .dmg…**.
+5. **BeamNG.drive folder:** click **Find it** to search your Steam libraries and drives, or
+   **Choose…**.
+
+**Continue** unlocks once everything is ticked; **Skip for now** lets you finish later. You can run
+the checks again from **Advanced → Run setup again…**. Then press **Play**.
 
 ## How it works
 
