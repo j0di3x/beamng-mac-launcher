@@ -110,19 +110,20 @@ struct SwitchToggle: View {
 struct ContentView: View {
     @EnvironmentObject var m: Launcher
     @AppStorage("showAdvanced") var showAdvanced = false
+    /// false until the first-run checks are passed or skipped (`-onboardingDone NO` shows them again)
+    @AppStorage("onboardingDone") var onboardingDone = false
     @State private var launcherLanguage = Languages.launcherOverride
     // `-startPage advanced` opens on that page (for README screenshots)
     @State private var page: Page = Page(rawValue: UserDefaults.standard.string(forKey: "startPage") ?? "") ?? .play
 
     enum Page: String, CaseIterable, Identifiable {
-        case play, graphics, controllers, language, advanced
+        case play, graphics, controls, advanced
         var id: String { rawValue }
         var title: String {
             switch self {
             case .play: return L("Play")
             case .graphics: return L("Graphics")
-            case .controllers: return L("Controllers")
-            case .language: return L("Language")
+            case .controls: return L("Controllers & Language")
             case .advanced: return L("Advanced")
             }
         }
@@ -130,8 +131,7 @@ struct ContentView: View {
             switch self {
             case .play: return "play.fill"
             case .graphics: return "display"
-            case .controllers: return "gamecontroller"
-            case .language: return "globe"
+            case .controls: return "gamecontroller"
             case .advanced: return "slider.horizontal.3"
             }
         }
@@ -143,14 +143,20 @@ struct ContentView: View {
     }()
 
     var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-            Rectangle().fill(Theme.stroke).frame(width: 1)
-            VStack(spacing: 0) {
-                if page == .advanced { advancedPage } else { overviewPage }
-                statusBar
+        Group {
+            if onboardingDone {
+                HStack(spacing: 0) {
+                    sidebar
+                    Rectangle().fill(Theme.stroke).frame(width: 1)
+                    VStack(spacing: 0) {
+                        if page == .advanced { advancedPage } else { overviewPage }
+                        statusBar
+                    }
+                    .background(Theme.main)
+                }
+            } else {
+                OnboardingView(done: { withAnimation(.easeInOut(duration: 0.25)) { onboardingDone = true } })
             }
-            .background(Theme.main)
         }
         // 600 tall in all: the content also fills the (hidden) title bar, which macOS adds on top
         .frame(width: 980, height: 600)
@@ -180,7 +186,7 @@ struct ContentView: View {
                         HStack(spacing: 10) {
                             Image(systemName: p.icon).frame(width: 18)
                                 .foregroundStyle(page == p ? Color.accentColor : .secondary)
-                            Text(p.title).font(.system(size: 13, weight: page == p ? .semibold : .regular))
+                            Text(p.title).font(.system(size: 13, weight: page == p ? .semibold : .regular)).lineLimit(1).minimumScaleFactor(0.85)
                             Spacer()
                         }
                         .padding(.horizontal, 10).padding(.vertical, 7)
@@ -240,24 +246,10 @@ struct ContentView: View {
                 if !m.setupComplete { setupCard }
                 if !m.pendingChanges.isEmpty { pendingBanner }
                 switch page {
-                case .play:
-                    VStack(alignment: .leading, spacing: 8) { SectionTitle(L("Play")); playCard }
+                case .play: playSections
                 case .graphics:
                     VStack(alignment: .leading, spacing: 8) { SectionTitle(L("Graphics")); graphicsCard }
-                default:
-                    // Controllers and Language share one tab, side by side, cards the same height
-                    Grid(alignment: .topLeading, horizontalSpacing: 16, verticalSpacing: 8) {
-                        GridRow {
-                            SectionTitle(L("Controllers"), trailing: AnyView(
-                                Button { m.refreshDevices() } label: { Image(systemName: "arrow.clockwise").font(.caption) }
-                                    .buttonStyle(.borderless).help(L("Scan again"))))
-                            SectionTitle(L("Language"))
-                        }
-                        GridRow {
-                            controllersCard
-                            languageCard
-                        }
-                    }
+                default: controlsSections
                 }
             }
             .padding(.horizontal, 30).padding(.top, 30).padding(.bottom, 24)
@@ -364,76 +356,87 @@ struct ContentView: View {
         .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
     }
 
-    var playCard: some View {
-        Card {
-            HStack {
-                Picker("", selection: Binding(get: { m.conf.beammp }, set: { m.setMultiplayer($0) })) {
-                    Text(L("Single player")).tag(false)
-                    Text(L("Multiplayer (BeamMP)")).tag(true)
-                }
-                .pickerStyle(.segmented).labelsHidden().fixedSize().disabled(m.downloading)
-                Spacer()
-                if m.beammpInstalled {
-                    moreMenu {
-                        Button(L("Update BeamMP")) { m.installBeamMP() }
-                        Button(L("Open BeamMP log")) { m.open(Paths.logs.appendingPathComponent("beammp.log")) }
-                        Button(L("BeamMP website")) { m.open(URL(string: "https://beammp.com")!) }
-                        Divider()
-                        Button(L("Remove BeamMP")) { m.removeAddon("beammp") }
-                    }
-                }
-            }
-            if m.conf.beammp {
-                Caption(L("BeamMP %@ starts before the game. In the game, open Multiplayer and pick a server.", m.addonVersions["beammp"] ?? ""))
-            } else if !m.beammpInstalled {
-                Caption(L("Multiplayer downloads the official BeamMP launcher (about 8 MB) from GitHub."))
-            }
-            Divider()
-            HStack(spacing: 8) {
-                Text(L("Real-world maps")).font(.system(size: 13, weight: .semibold))
-                Pill(text: L("experimental"))
-            }
-            SettingRow(title: "BeamNG.Earth" + (m.addonVersions["earth"].map { "  \($0)" } ?? ""),
-                       detail: m.earthInstalled
-                        ? L("The whole planet, streamed from satellite and map data while you drive. In the game: Freeroam → BeamNG.Earth.")
-                        : L("The whole planet, streamed from satellite and map data while you drive. About 90 MB; needs internet.")) {
-                HStack(spacing: 8) {
-                    updateBadge("earth") { m.installEarth() }
-                    if m.earthInstalled {
-                        moreMenu {
-                            Button(L("Update BeamNG.Earth")) { m.installEarth() }
-                            Button(L("Open BeamNG.Earth log")) { m.open(Paths.prefix.appendingPathComponent("drive_c/users/steamuser/AppData/Local/beamng-earth/logs/server.log")) }
-                            Button(L("Project page")) { m.open(URL(string: "https://github.com/TecnaGamer/BeamNG.Earth")!) }
-                            Divider()
-                            Button(L("Remove BeamNG.Earth")) { m.removeAddon("earth") }
+    var playSections: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 8) {
+                SectionTitle(L("Mode"))
+                Card {
+                    HStack {
+                        Picker("", selection: Binding(get: { m.conf.beammp }, set: { m.setMultiplayer($0) })) {
+                            Text(L("Single player")).tag(false)
+                            Text(L("Multiplayer (BeamMP)")).tag(true)
+                        }
+                        .pickerStyle(.segmented).labelsHidden().fixedSize().disabled(m.downloading)
+                        Spacer()
+                        if m.beammpInstalled {
+                            moreMenu {
+                                Button(L("Update BeamMP")) { m.installBeamMP() }
+                                Button(L("Open BeamMP log")) { m.open(Paths.logs.appendingPathComponent("beammp.log")) }
+                                Button(L("BeamMP website")) { m.open(URL(string: "https://beammp.com")!) }
+                                Divider()
+                                Button(L("Remove BeamMP")) { m.removeAddon("beammp") }
+                            }
                         }
                     }
-                    SwitchToggle(isOn: Binding(get: { m.conf.earth }, set: { m.setEarth($0) })).disabled(m.downloading)
+                    Caption(m.conf.beammp
+                        ? L("BeamMP %@ starts before the game. In the game, open Multiplayer and pick a server.", m.addonVersions["beammp"] ?? "")
+                        : (m.beammpInstalled ? L("Drive on your own, with your mods and maps.")
+                                             : L("Multiplayer downloads the official BeamMP launcher (about 8 MB) from GitHub.")))
                 }
             }
-            SettingRow(title: "EarthNG", detail: earthngDetail) {
-                if m.earthngInstalled {
-                    HStack(spacing: 8) {
-                        updateBadge("earthng") { m.installEarthNG() }
-                        moreMenu {
-                            Button(L("Get the Albania map (226 MB)")) { m.installEarthNGAlbania() }
-                            Button(L("Add map pack…")) { m.addEarthNGPack() }
-                            Button(L("More maps")) { m.open(URL(string: "https://github.com/Alezx311/earthng#install-and-play")!) }
-                            Divider()
-                            Button(L("Update EarthNG")) { m.installEarthNG() }
-                            Button(L("Remove EarthNG and its maps")) { m.removeAddon("earthng") }
+            VStack(alignment: .leading, spacing: 8) {
+                SectionTitle(L("Real-world maps"), trailing: AnyView(Pill(text: L("experimental"))))
+                Card {
+                    SettingRow(title: "BeamNG.Earth" + (m.addonVersions["earth"].map { "  \($0)" } ?? ""),
+                               detail: m.earthInstalled
+                                ? L("The whole planet, streamed from satellite and map data while you drive. In the game: Freeroam → BeamNG.Earth.")
+                                : L("The whole planet, streamed from satellite and map data while you drive. About 90 MB; needs internet.")) {
+                        HStack(spacing: 8) {
+                            updateBadge("earth") { m.installEarth() }
+                            if m.earthInstalled {
+                                moreMenu {
+                                    Button(L("Update BeamNG.Earth")) { m.installEarth() }
+                                    Button(L("Open BeamNG.Earth log")) { m.open(Paths.prefix.appendingPathComponent("drive_c/users/steamuser/AppData/Local/beamng-earth/logs/server.log")) }
+                                    Button(L("Project page")) { m.open(URL(string: "https://github.com/TecnaGamer/BeamNG.Earth")!) }
+                                    Divider()
+                                    Button(L("Remove BeamNG.Earth")) { m.removeAddon("earth") }
+                                }
+                            }
+                            SwitchToggle(isOn: Binding(get: { m.conf.earth }, set: { m.setEarth($0) })).disabled(m.downloading)
                         }
                     }
-                } else {
-                    Button(L("Install")) { m.installEarthNG() }.disabled(m.downloading)
+                    .padding(.vertical, 4)
+                    Divider()
+                    SettingRow(title: "EarthNG", detail: earthngDetail) {
+                        if m.earthngInstalled {
+                            HStack(spacing: 8) {
+                                updateBadge("earthng") { m.installEarthNG() }
+                                moreMenu {
+                                    Button(L("Get the Albania map (226 MB)")) { m.installEarthNGAlbania() }
+                                    Button(L("Add map pack…")) { m.addEarthNGPack() }
+                                    Button(L("More maps")) { m.open(URL(string: "https://github.com/Alezx311/earthng#install-and-play")!) }
+                                    Divider()
+                                    Button(L("Update EarthNG")) { m.installEarthNG() }
+                                    Button(L("Remove EarthNG and its maps")) { m.removeAddon("earthng") }
+                                }
+                            }
+                        } else {
+                            Button(L("Install")) { m.installEarthNG() }.disabled(m.downloading)
+                        }
+                    }
+                    .padding(.vertical, 4)
                 }
             }
-            Divider()
-            SettingRow(title: L("Show in Discord status"),
-                       detail: m.conf.discord && !m.discordRunning
-                        ? L("Discord isn't open. Your status appears once it is.")
-                        : L("Friends see your map and car while you play.")) {
-                SwitchToggle(isOn: Binding(get: { m.conf.discord }, set: { m.setDiscord($0) }))
+            VStack(alignment: .leading, spacing: 8) {
+                SectionTitle("Discord")
+                Card {
+                    SettingRow(title: L("Show in Discord status"),
+                               detail: m.conf.discord && !m.discordRunning
+                                ? L("Discord isn't open. Your status appears once it is.")
+                                : L("Friends see your map and car while you play.")) {
+                        SwitchToggle(isOn: Binding(get: { m.conf.discord }, set: { m.setDiscord($0) }))
+                    }
+                }
             }
         }
     }
@@ -575,39 +578,64 @@ struct ContentView: View {
 
     // MARK: controllers and language
 
-    var controllersCard: some View {
-        Card {
-            let pads = m.devices.filter { $0.kind != .wheel }
-            let wheels = m.devices.filter { $0.kind == .wheel }
-            deviceLine(ok: !pads.isEmpty, title: pads.isEmpty ? L("No controller connected") : L("Controller detected"),
-                       items: pads.map { "\($0.name) · \(L($0.connection))" })
-            deviceLine(ok: !wheels.isEmpty, title: wheels.isEmpty ? L("No steering wheel connected") : L("Steering wheel detected"),
-                       items: wheels.map { "\($0.name) · \(L($0.connection))" })
-            if !m.seenByGame.isEmpty {
-                Caption(L("BeamNG saw last time: %@", m.seenByGame.joined(separator: ", ")))
+    var controlsSections: some View {
+        let pads = m.devices.filter { $0.kind != .wheel }
+        let wheels = m.devices.filter { $0.kind == .wheel }
+        return VStack(alignment: .leading, spacing: 26) {
+            VStack(alignment: .leading, spacing: 8) {
+                SectionTitle(L("Controllers"), trailing: AnyView(
+                    Button { m.refreshDevices() } label: { Label(L("Scan again"), systemImage: "arrow.clockwise").font(.caption) }
+                        .buttonStyle(.borderless)))
+                Card {
+                    deviceRow(icon: "gamecontroller.fill", title: L("Controller"), items: pads.map { "\($0.name) · \(L($0.connection))" },
+                              empty: L("Plug one in over USB or pair it with Bluetooth. Xbox, PlayStation and Switch pads work."))
+                    Divider()
+                    deviceRow(icon: "steeringwheel", title: L("Steering wheel"), items: wheels.map { "\($0.name) · \(L($0.connection))" },
+                              empty: L("Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB."))
+                    if !m.seenByGame.isEmpty {
+                        Divider()
+                        Caption(L("BeamNG saw last time: %@", m.seenByGame.joined(separator: ", ")))
+                    }
+                }
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                SectionTitle(L("Language"))
+                Card {
+                    HStack(alignment: .top, spacing: 22) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Field(label: L("Game")) {
+                                PopUp(selection: Binding(get: { m.gameLanguage }, set: { m.setGameLanguage($0) }), options: gameLanguageOptions)
+                            }
+                            Caption(L("Menus and text inside BeamNG.drive."))
+                        }
+                        VStack(alignment: .leading, spacing: 6) {
+                            Field(label: L("Launcher")) {
+                                PopUp(selection: Binding(get: { launcherLanguage }, set: { launcherLanguage = $0; m.setLauncherLanguage($0) }), options: launcherLanguageOptions)
+                            }
+                            Caption(L("This window. Changes after a restart of the launcher."))
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
             }
         }
     }
 
-    func deviceLine(ok: Bool, title: String, items: [String]) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 9) {
-            Circle().fill(ok ? Color.green : Color.secondary.opacity(0.6)).frame(width: 7, height: 7)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 13))
+    func deviceRow(icon: String, title: String, items: [String], empty: String) -> some View {
+        HStack(alignment: .center, spacing: 14) {
+            Image(systemName: icon).font(.system(size: 17))
+                .foregroundStyle(items.isEmpty ? Color.secondary : Color.accentColor)
+                .frame(width: 44, height: 44)
+                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Theme.chip))
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.system(size: 13, weight: .medium))
+                if items.isEmpty { Caption(empty) }
                 ForEach(items, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
             }
+            Spacer()
+            Pill(text: items.isEmpty ? L("Not connected") : L("Connected"), color: items.isEmpty ? .secondary : .green)
         }
-    }
-
-    var languageCard: some View {
-        Card {
-            Field(label: L("Game")) {
-                PopUp(selection: Binding(get: { m.gameLanguage }, set: { m.setGameLanguage($0) }), options: gameLanguageOptions)
-            }
-            Field(label: L("Launcher")) {
-                PopUp(selection: Binding(get: { launcherLanguage }, set: { launcherLanguage = $0; m.setLauncherLanguage($0) }), options: launcherLanguageOptions)
-            }
-        }
+        .padding(.vertical, 14)
     }
 
     // MARK: advanced page
@@ -667,6 +695,7 @@ struct ContentView: View {
                             Button(L("Game folder…")) { m.chooseGameDir() }
                             Button(L("Open mods folder")) { m.open(Paths.mods) }
                             Button(L("Open game log")) { m.open(Paths.gameLog) }
+                            Button(L("Run setup again…")) { onboardingDone = false }
                         }
                         Divider()
                         HStack(spacing: 12) {
@@ -747,6 +776,153 @@ struct PopUp<V: Hashable>: NSViewRepresentable {
             let i = b.indexOfSelectedItem
             guard parent.options.indices.contains(i) else { return }
             parent.selection = parent.options[i].0
+        }
+    }
+}
+
+// MARK: - first-run setup
+
+/// Checks everything the launcher needs, one row each, with a button to fix what's missing.
+struct OnboardingView: View {
+    @EnvironmentObject var m: Launcher
+    let done: () -> Void
+    @State private var rosettaBusy = false
+    @State private var recheck = 0
+
+    static var appleSilicon: Bool {
+        var sysinfo = utsname(); uname(&sysinfo)
+        return withUnsafeBytes(of: &sysinfo.machine) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }.hasPrefix("arm64")
+    }
+    static var rosetta: Bool { FileManager.default.fileExists(atPath: "/Library/Apple/usr/libexec/oah/libRosettaRuntime") }
+    static var gameHubApp: URL? { NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.gamemac.www") }
+    /// GameHub sets up its Wine the first time it runs a Windows game.
+    static var gameHubWine: Bool {
+        let d = Paths.home.appendingPathComponent("Library/Application Support/com.gamemac.www/wine-engine/containers/wine_installations")
+        return ((try? FileManager.default.contentsOfDirectory(atPath: d.path)) ?? []).contains {
+            FileManager.default.isExecutableFile(atPath: d.appendingPathComponent($0 + "/bin/wine").path)
+        }
+    }
+
+    var body: some View {
+        let _ = recheck
+        let ready = Self.appleSilicon && Self.rosetta && m.wineOK && m.prefixOK && m.gptkOK && m.gameDirOK
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 14) {
+                Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 72, height: 72)
+                Text(L("Welcome to BeamNG Launcher")).font(.system(size: 24, weight: .bold)).fixedSize(horizontal: false, vertical: true)
+                Text(L("Play BeamNG.drive on your Mac through Wine and Apple's Game Porting Toolkit. First, let's check that everything it needs is here."))
+                    .font(.system(size: 13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Spacer()
+                Caption(L("You can run these checks again any time from Advanced."))
+            }
+            .padding(.horizontal, 28).padding(.top, 64).padding(.bottom, 24)
+            .frame(width: 300).frame(maxHeight: .infinity, alignment: .top)
+            .background(Theme.sidebar)
+            Rectangle().fill(Theme.stroke).frame(width: 1)
+            VStack(alignment: .leading, spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 8) {
+                        SectionTitle(L("Requirements"))
+                        Card {
+                            check(Self.appleSilicon, L("Apple silicon Mac"),
+                                  Self.appleSilicon ? L("Game Porting Toolkit needs an M-series chip.") : L("This Mac has an Intel chip. Game Porting Toolkit only runs on Apple silicon.")) { EmptyView() }
+                            Divider()
+                            check(Self.rosetta, "Rosetta 2",
+                                  Self.rosetta ? L("Runs the Intel build of Wine.") : L("Wine is built for Intel chips and runs through Rosetta. Installing it takes a minute.")) {
+                                if !Self.rosetta {
+                                    Button(rosettaBusy ? L("Installing…") : L("Install")) { installRosetta() }.disabled(rosettaBusy)
+                                }
+                            }
+                            Divider()
+                            check(m.wineOK && m.prefixOK, L("Wine runtime"), wineDetail) {
+                                if !(m.wineOK && m.prefixOK) {
+                                    if Self.gameHubApp != nil && !Self.gameHubWine {
+                                        Button(L("Open GameHub")) { if let u = Self.gameHubApp { NSWorkspace.shared.open(u) } }
+                                    }
+                                    Button(L("Import from GameHub")) { m.importRuntime() }.disabled(m.busy || !Self.gameHubWine)
+                                }
+                            }
+                            Divider()
+                            check(m.gptkOK, L("Apple Game Porting Toolkit"),
+                                  m.gptkOK ? L("GPTK %@ is installed.", m.currentGPTK) : L("Download \"Evaluation environment for Windows games\" from Apple (free Apple ID), then choose the .dmg here.")) {
+                                if !m.gptkOK {
+                                    Button(L("Get from Apple")) { m.open(URL(string: "https://developer.apple.com/download/all/?q=game%20porting%20toolkit")!) }
+                                    Button(L("Install .dmg…")) { m.installGPTK() }.disabled(m.busy)
+                                }
+                            }
+                            Divider()
+                            check(m.gameDirOK, L("BeamNG.drive folder"), m.gameDirOK ? m.conf.gameDir : L("The folder with BeamNG.drive.exe, for example in your Steam library.")) {
+                                if !m.gameDirOK {
+                                    Button(L("Find it")) { findGame() }
+                                }
+                                Button(m.gameDirOK ? L("Change…") : L("Choose…")) { m.chooseGameDir(); recheck += 1 }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 30).padding(.top, 52).padding(.bottom, 16)
+                }
+                Rectangle().fill(Theme.stroke).frame(height: 1)
+                HStack(spacing: 10) {
+                    if m.busy { ProgressView().controlSize(.small) }
+                    Text(ready ? L("All set. You're ready to drive.") : (m.message.isEmpty ? L("Fix the items marked in orange, or skip and do it later.") : m.message))
+                        .font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    Spacer()
+                    Button(L("Check again")) { refresh() }
+                    if !ready { Button(L("Skip for now")) { done() } }
+                    Button(L("Continue")) { done() }
+                        .buttonStyle(.borderedProminent).disabled(!ready).keyboardShortcut(.defaultAction)
+                }
+                .padding(.horizontal, 30).padding(.vertical, 14)
+            }
+            .background(Theme.main)
+        }
+        .onAppear { refresh() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in refresh() }
+        .onChange(of: m.busy) { _ in refresh() }
+    }
+
+    var wineDetail: String {
+        if m.wineOK && m.prefixOK { return L("Imported from GameHub.") }
+        if Self.gameHubApp == nil { return L("The launcher borrows GameHub's Wine. Install GameHub, run any Windows game in it once, then import.") }
+        if !Self.gameHubWine { return L("GameHub is installed. Run any Windows game in it once so it sets up Wine, then import.") }
+        return L("GameHub's Wine is ready to import. It takes a few seconds and almost no disk space.")
+    }
+
+    func check<Accessory: View>(_ ok: Bool, _ title: String, _ detail: String, @ViewBuilder _ accessory: () -> Accessory) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                .font(.system(size: 18)).foregroundStyle(ok ? Color.green : Color.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(size: 13, weight: .medium))
+                Caption(detail).lineLimit(2).truncationMode(.middle)
+            }
+            Spacer(minLength: 8)
+            HStack(spacing: 6) { accessory() }.controlSize(.small)
+        }
+        .padding(.vertical, 2)
+    }
+
+    func refresh() { m.refreshSetup(); recheck += 1 }
+
+    func findGame() {
+        if let d = Launcher.findGameDir() {
+            m.conf.gameDir = d; m.conf.save(); m.loadGraphics()
+            m.message = L("Found BeamNG.drive in %@.", d)
+        } else {
+            m.message = L("Couldn't find BeamNG.drive. Choose its folder instead.")
+        }
+        recheck += 1
+    }
+
+    /// Apple's installer for Rosetta; macOS asks for an administrator password.
+    func installRosetta() {
+        rosettaBusy = true
+        Task.detached {
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+            p.arguments = ["-e", "do shell script \"/usr/sbin/softwareupdate --install-rosetta --agree-to-license\" with administrator privileges"]
+            try? p.run(); p.waitUntilExit()
+            await MainActor.run { rosettaBusy = false; recheck += 1 }
         }
     }
 }
