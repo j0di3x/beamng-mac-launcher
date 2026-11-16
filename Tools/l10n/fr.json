@@ -167,5 +167,17 @@
  "Resolution scale": "Échelle de résolution",
  "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "Rendu en %@, agrandi avec FSR 3. Plus bas est plus rapide mais plus flou.",
  "Lower it to render fewer pixels and get more FPS.": "Baissez-la pour calculer moins de pixels et gagner des IPS.",
- "Sharpness works with FSR 3.": "La netteté fonctionne avec FSR 3."
+ "Sharpness works with FSR 3.": "La netteté fonctionne avec FSR 3.",
+ "Renderer: %@. Used from the next start.": "Moteur de rendu : %@. Utilisé au prochain lancement.",
+ "Renderer: %@. Restart the game to use it.": "Moteur de rendu : %@. Relancez le jeu pour l’utiliser.",
+ "The DXVK download was damaged (checksum mismatch). Try again.": "Le téléchargement de DXVK est endommagé (somme de contrôle différente). Réessayez.",
+ "Couldn't unpack DXVK.": "Impossible de décompresser DXVK.",
+ "DXVK installed. Renderer: DXVK from the next start.": "DXVK installé. Moteur de rendu : DXVK au prochain lancement.",
+ "Renderer": "Moteur de rendu",
+ "pre-release": "préversion",
+ "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.": "Le rendu DirectX 11 du jeu sur Apple D3DMetal. Plus ancien et plus simple ; certains effets sont différents.",
+ "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.": "DirectX 11 traduit en Vulkan par DXVK, puis en Metal par MoltenVK. La première partie saccade pendant la création des shaders.",
+ "Downloads DXVK (2.8 MB) the first time.": "Télécharge DXVK (2,8 Mo) la première fois.",
+ "BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.": "Le rendu Vulkan de BeamNG sur MoltenVK. Expérimental : avec le Wine actuel, il plante au lancement ; revenez en arrière si c’est le cas.",
+ "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "Le rendu DirectX 12 par défaut du jeu sur Apple D3DMetal. Le plus testé."
 }

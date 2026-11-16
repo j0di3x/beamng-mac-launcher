@@ -167,5 +167,17 @@
  "Resolution scale": "Auflösungsskalierung",
  "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "Rendert in %@ und skaliert mit FSR 3 hoch. Niedriger ist schneller, aber unschärfer.",
  "Lower it to render fewer pixels and get more FPS.": "Senke sie, um weniger Pixel zu rendern und mehr FPS zu bekommen.",
- "Sharpness works with FSR 3.": "Schärfe funktioniert mit FSR 3."
+ "Sharpness works with FSR 3.": "Schärfe funktioniert mit FSR 3.",
+ "Renderer: %@. Used from the next start.": "Renderer: %@. Gilt ab dem nächsten Start.",
+ "Renderer: %@. Restart the game to use it.": "Renderer: %@. Starte das Spiel neu, um ihn zu nutzen.",
+ "The DXVK download was damaged (checksum mismatch). Try again.": "Der DXVK-Download ist beschädigt (Prüfsumme stimmt nicht). Versuche es erneut.",
+ "Couldn't unpack DXVK.": "DXVK konnte nicht entpackt werden.",
+ "DXVK installed. Renderer: DXVK from the next start.": "DXVK installiert. Renderer: DXVK ab dem nächsten Start.",
+ "Renderer": "Renderer",
+ "pre-release": "Vorabversion",
+ "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.": "Der DirectX-11-Renderer des Spiels auf Apple D3DMetal. Älter und einfacher; manche Effekte sehen anders aus.",
+ "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.": "DirectX 11 wird von DXVK in Vulkan und von MoltenVK in Metal übersetzt. Die erste Fahrt ruckelt, solange Shader erstellt werden.",
+ "Downloads DXVK (2.8 MB) the first time.": "Lädt beim ersten Mal DXVK (2,8 MB) herunter.",
+ "BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.": "BeamNGs eigener Vulkan-Renderer auf MoltenVK. Experimentell: Mit dem aktuellen Wine stürzt er beim Start ab; wechsle dann zurück.",
+ "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "Der Standard-DirectX-12-Renderer des Spiels auf Apple D3DMetal. Am besten getestet."
 }

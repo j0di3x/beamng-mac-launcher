@@ -37,6 +37,8 @@ enum Paths {
     static let addonVersions = addons.appendingPathComponent("versions.json")
     static let beammpExe = addons.appendingPathComponent("beammp/BeamMP-Launcher.exe")
     static let earthExe = addons.appendingPathComponent("beamng-earth/BeamNG.Earth.exe")
+    static let dxvk = addons.appendingPathComponent("dxvk")
+    static let dxvkDll = dxvk.appendingPathComponent("x86_64-windows/d3d11.dll")
     static let earthMod = mods.appendingPathComponent("unpacked/beamng_earth")
     static let earthngPlanet = mods.appendingPathComponent("earthng_planet.zip")
     static let beamngIni = prefix.appendingPathComponent("drive_c/users/steamuser/AppData/Local/BeamNG/BeamNG.drive.ini")
@@ -86,6 +88,7 @@ struct LauncherConfig {
     var beammp = false
     var earth = false
     var discord = true
+    var renderer = "d3d12"   // d3d12, d3d11, vulkan, dxvk
 
     static func load() -> LauncherConfig {
         var c = LauncherConfig()
@@ -107,6 +110,7 @@ struct LauncherConfig {
             case "BEAMMP": c.beammp = val == "1"
             case "EARTH": c.earth = val == "1"
             case "DISCORD": c.discord = val != "0"
+            case "RENDERER": c.renderer = ["d3d12", "d3d11", "vulkan", "dxvk"].contains(val) ? val : "d3d12"
             default: break
             }
         }
@@ -126,6 +130,7 @@ struct LauncherConfig {
         BEAMMP=\(beammp ? 1 : 0)
         EARTH=\(earth ? 1 : 0)
         DISCORD=\(discord ? 1 : 0)
+        RENDERER=\(renderer)
 
         """
         try? FileManager.default.createDirectory(at: Paths.root, withIntermediateDirectories: true)
@@ -506,6 +511,7 @@ final class Launcher: ObservableObject {
     // add-ons: BeamMP, BeamNG.Earth, EarthNG
     @Published var beammpInstalled = false
     @Published var earthInstalled = false
+    @Published var dxvkInstalled = false
     @Published var earthngInstalled = false
     @Published var earthngPacks: [String] = []
     @Published var addonVersions: [String: String] = [:]
@@ -879,6 +885,8 @@ final class Launcher: ObservableObject {
            let o = try? JSONSerialization.jsonObject(with: d) as? [String: String] { addonVersions = o }
         if conf.beammp && !beammpInstalled { conf.beammp = false; conf.save() }
         if conf.earth && !earthInstalled { conf.earth = false; conf.save() }
+        dxvkInstalled = fm.fileExists(atPath: Paths.dxvkDll.path)
+        if conf.renderer == "dxvk" && !dxvkInstalled { conf.renderer = "d3d12"; conf.save() }
     }
 
     private func saveVersion(_ addon: String, _ v: String?) {
@@ -964,6 +972,50 @@ final class Launcher: ObservableObject {
             do { message = try await job() }
             catch { message = error.localizedDescription }
             refreshAddons()
+        }
+    }
+
+    // MARK: renderer (pre-release)
+
+    static let renderers: [(id: String, name: String)] = [
+        ("d3d12", "Direct3D 12 · D3DMetal"), ("d3d11", "Direct3D 11 · D3DMetal"),
+        ("dxvk", "Direct3D 11 · DXVK → MoltenVK"), ("vulkan", "Vulkan · MoltenVK"),
+    ]
+    static func rendererShort(_ id: String) -> String {
+        ["d3d12": "DX12", "d3d11": "DX11", "dxvk": "DXVK", "vulkan": "Vulkan"][id] ?? id
+    }
+
+    func setRenderer(_ id: String) {
+        if id == "dxvk" && !dxvkInstalled { installDXVK(); return }
+        conf.renderer = id; conf.save()
+        message = state == .stopped ? L("Renderer: %@. Used from the next start.", Launcher.rendererShort(id))
+                                    : L("Renderer: %@. Restart the game to use it.", Launcher.rendererShort(id))
+    }
+
+    /// DXVK-macOS (Gcenx), the "builtin" build: Wine loads it through WINEDLLPATH, nothing in the prefix changes.
+    static let dxvkURL = URL(string: "https://github.com/Gcenx/DXVK-macOS/releases/download/v1.10.3-20230507-repack/dxvk-macOS-async-v1.10.3-20230507-repack-builtin.tar.gz")!
+    static let dxvkSHA = "810b1e5caf8ce975b784fae866a130ad23fa0ea233b0e5609cbc4a45f3ef6f00"
+
+    func installDXVK() {
+        runAddonJob {
+            let tmp = try await self.download(Launcher.dxvkURL, title: "DXVK 1.10.3")
+            defer { try? FileManager.default.removeItem(at: tmp) }
+            guard Launcher.sha256(tmp) == Launcher.dxvkSHA else {
+                throw LauncherError(L("The DXVK download was damaged (checksum mismatch). Try again."))
+            }
+            let fm = FileManager.default
+            if fm.fileExists(atPath: Paths.dxvk.path) { try fm.removeItem(at: Paths.dxvk) }
+            try fm.createDirectory(at: Paths.dxvk, withIntermediateDirectories: true)
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/usr/bin/tar")
+            p.arguments = ["xzf", tmp.path, "-C", Paths.dxvk.path, "--strip-components", "1"]
+            try p.run(); p.waitUntilExit()
+            guard p.terminationStatus == 0, fm.fileExists(atPath: Paths.dxvkDll.path) else {
+                throw LauncherError(L("Couldn't unpack DXVK."))
+            }
+            self.saveVersion("dxvk", "1.10.3")
+            self.conf.renderer = "dxvk"; self.conf.save()
+            return L("DXVK installed. Renderer: DXVK from the next start.")
         }
     }
 
@@ -1153,7 +1205,7 @@ final class Launcher: ObservableObject {
         p["GraphicDisplayModes"] = "Window"
         if let f = NSScreen.main?.visibleFrame { p["GraphicDisplayResolutions"] = "\(Int(f.width)) \(Int(f.height) - 28)" }
         GameSettingsFile.merge(p)
-        conf.fixTrees = true; conf.metal4 = true; conf.fpsHUD = false; conf.extraArgs = ""
+        conf.fixTrees = true; conf.metal4 = true; conf.fpsHUD = false; conf.extraArgs = ""; conf.renderer = "d3d12"
         conf.gptkVersion = "current"; conf.save()
         if fogFix { setFogFix(false) }
         loadGraphics()
@@ -1308,7 +1360,7 @@ struct ContentView: View {
                 Text("BeamNG.drive").font(.title2.bold())
                 HStack(spacing: 10) {
                     StatusDot(state: m.state)
-                    Text("GPTK \(m.currentGPTK.isEmpty ? "—" : m.currentGPTK)\(m.conf.metal4 ? " · Metal 4" : "")")
+                    Text("GPTK \(m.currentGPTK.isEmpty ? "—" : m.currentGPTK)\(m.conf.metal4 ? " · Metal 4" : "") · \(Launcher.rendererShort(m.conf.renderer))")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 if m.state != .stopped && (m.conf.beammp || m.conf.earth) {
@@ -1532,12 +1584,36 @@ struct ContentView: View {
                 Caption(m.renderScale < 0.99 || m.aaType == "fsr3"
                     ? L("Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.", m.renderResolution)
                     : L("Lower it to render fewer pixels and get more FPS."))
+                LabeledContent {
+                    Picker("", selection: Binding(get: { m.conf.renderer }, set: { m.setRenderer($0) })) {
+                        ForEach(Launcher.renderers, id: \.id) { Text($0.name).tag($0.id) }
+                    }.labelsHidden().frame(width: 240).disabled(m.downloading)
+                } label: {
+                    HStack(spacing: 6) {
+                        Text(L("Renderer"))
+                        Text(L("pre-release")).font(.caption2).foregroundStyle(.orange)
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .overlay(Capsule().stroke(.orange.opacity(0.6)))
+                    }
+                }
+                Caption(rendererNote)
                 Toggle(L("Show FPS counter"), isOn: Binding(get: { m.conf.fpsHUD }, set: {
                     m.conf.fpsHUD = $0; m.conf.save()
                     m.message = $0 ? L("FPS counter on from the next start.") : L("FPS counter off from the next start.")
                 }))
             }
             .padding(6)
+        }
+    }
+
+    var rendererNote: String {
+        switch m.conf.renderer {
+        case "d3d11": return L("The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.")
+        case "dxvk": return m.dxvkInstalled
+            ? L("DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.")
+            : L("Downloads DXVK (2.8 MB) the first time.")
+        case "vulkan": return L("BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.")
+        default: return L("The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.")
         }
     }
 

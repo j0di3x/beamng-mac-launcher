@@ -167,5 +167,17 @@
  "Resolution scale": "Skala rozdzielczości",
  "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "Renderuje w %@ i skaluje w górę przez FSR 3. Niżej jest szybciej, ale bardziej rozmyte.",
  "Lower it to render fewer pixels and get more FPS.": "Zmniejsz, aby renderować mniej pikseli i mieć więcej FPS.",
- "Sharpness works with FSR 3.": "Ostrość działa z FSR 3."
+ "Sharpness works with FSR 3.": "Ostrość działa z FSR 3.",
+ "Renderer: %@. Used from the next start.": "Renderer: %@. Używany od następnego uruchomienia.",
+ "Renderer: %@. Restart the game to use it.": "Renderer: %@. Uruchom grę ponownie, aby go użyć.",
+ "The DXVK download was damaged (checksum mismatch). Try again.": "Pobrany DXVK jest uszkodzony (niezgodna suma kontrolna). Spróbuj ponownie.",
+ "Couldn't unpack DXVK.": "Nie udało się rozpakować DXVK.",
+ "DXVK installed. Renderer: DXVK from the next start.": "DXVK zainstalowany. Renderer: DXVK od następnego uruchomienia.",
+ "Renderer": "Renderer",
+ "pre-release": "wersja wstępna",
+ "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.": "Renderer DirectX 11 gry na Apple D3DMetal. Starszy i prostszy; niektóre efekty wyglądają inaczej.",
+ "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.": "DirectX 11 tłumaczony na Vulkan przez DXVK, a potem na Metal przez MoltenVK. Pierwsza jazda przycina, gdy tworzone są shadery.",
+ "Downloads DXVK (2.8 MB) the first time.": "Za pierwszym razem pobiera DXVK (2,8 MB).",
+ "BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.": "Własny renderer Vulkan BeamNG na MoltenVK. Eksperymentalny: z obecnym Wine zawiesza się przy starcie; wtedy przełącz z powrotem.",
+ "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "Domyślny renderer DirectX 12 gry na Apple D3DMetal. Najlepiej przetestowany."
 }

@@ -3,7 +3,7 @@
 # Optional helpers started first, in the same Wine prefix: BeamMP (multiplayer) and BeamNG.Earth (world server).
 R="$HOME/Library/Application Support/BeamNG-GPTK4"
 GAME_DIR=""; GAME_ARGS="-nogfxgpudriven"; EXTRA_ARGS=""; METAL4=1; FPS_HUD=0; GPTK_VERSION=current
-BEAMMP=0; EARTH=0
+BEAMMP=0; EARTH=0; RENDERER=d3d12
 [ -f "$R/launcher.conf" ] && source "$R/launcher.conf"
 
 W=$(ls -d "$R"/containers/wine_installations/*(N/) | head -1)
@@ -25,7 +25,27 @@ export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 [ "$METAL4" = 1 ] && export D3DM_MTL4=1
 [ "$FPS_HUD" = 1 ] && export MTL_HUD_ENABLED=1
 
-echo "== $(date) gptk=$(readlink "$GPTK" || echo "$GPTK_VERSION") metal4=$METAL4 fps=$FPS_HUD beammp=$BEAMMP earth=$EARTH args=$GAME_ARGS $EXTRA_ARGS" > "$LOG"
+# Renderer. d3d12/d3d11 go through Apple D3DMetal. vulkan is BeamNG's own Vulkan renderer on
+# MoltenVK (Vulkan on Metal, ships with Wine). dxvk is the game's D3D11 renderer translated to
+# Vulkan by DXVK-macOS, then to Metal by MoltenVK.
+GFX=""
+case "$RENDERER" in
+  d3d11) GFX="-gfx dx11" ;;
+  vulkan) GFX="-gfx vulkan" ;;
+  dxvk)
+    [ -f "$ADDONS/dxvk/x86_64-windows/d3d11.dll" ] || fail "DXVK is picked as the renderer but not installed. Install it in the launcher."
+    GFX="-gfx dx11"
+    export WINEDLLPATH="$ADDONS/dxvk"          # DXVK's d3d11 instead of D3DMetal's
+    export DXVK_ASYNC=1 DXVK_LOG_LEVEL=warn DXVK_LOG_PATH="$R/logs"
+    [ "$FPS_HUD" = 1 ] && export DXVK_HUD=fps
+    ;;
+esac
+if [ "$RENDERER" = vulkan ] || [ "$RENDERER" = dxvk ]; then
+  export MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=1 MVK_CONFIG_RESUME_LOST_DEVICE=1
+  export MVK_CONFIG_LOG_LEVEL=1
+fi
+
+echo "== $(date) gptk=$(readlink "$GPTK" || echo "$GPTK_VERSION") metal4=$METAL4 fps=$FPS_HUD beammp=$BEAMMP earth=$EARTH renderer=$RENDERER args=$GFX $GAME_ARGS $EXTRA_ARGS" > "$LOG"
 
 wait_port() {   # port, seconds. lsof, not a test connection: BeamMP would take one for the game
   for i in {1..$2}; do lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1 && return 0; sleep 1; done
@@ -57,7 +77,7 @@ if [ "$BEAMMP" = 1 ]; then
 fi
 
 cd "$GAME_DIR"
-"$W/bin/wine" "$GAME_DIR/BeamNG.drive.exe" ${=GAME_ARGS} ${=EXTRA_ARGS} >> "$LOG" 2>&1
+"$W/bin/wine" "$GAME_DIR/BeamNG.drive.exe" ${=GFX} ${=GAME_ARGS} ${=EXTRA_ARGS} >> "$LOG" 2>&1
 if [ "$BEAMMP" = 1 ] || [ "$EARTH" = 1 ]; then
   # BeamNG.drive.exe hands over to BeamNG.drive.x64.exe: wait for the game itself, then stop the helpers
   for i in {1..60}; do pgrep -f "BeamNG.drive.x64.exe" >/dev/null && break; sleep 1; done

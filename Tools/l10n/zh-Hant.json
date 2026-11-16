@@ -167,5 +167,17 @@
  "Resolution scale": "解析度縮放",
  "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "以 %@ 算繪，再用 FSR 3 放大。越低越流暢，但越模糊。",
  "Lower it to render fewer pixels and get more FPS.": "調低可減少算繪像素，提高 FPS。",
- "Sharpness works with FSR 3.": "銳度需配合 FSR 3 使用。"
+ "Sharpness works with FSR 3.": "銳度需配合 FSR 3 使用。",
+ "Renderer: %@. Used from the next start.": "渲染器：%@。下次啟動時生效。",
+ "Renderer: %@. Restart the game to use it.": "渲染器：%@。重新啟動遊戲後生效。",
+ "The DXVK download was damaged (checksum mismatch). Try again.": "DXVK 下載已損壞（校驗和不符）。請再試一次。",
+ "Couldn't unpack DXVK.": "無法解壓縮 DXVK。",
+ "DXVK installed. Renderer: DXVK from the next start.": "DXVK 已安裝。下次啟動時渲染器為 DXVK。",
+ "Renderer": "渲染器",
+ "pre-release": "預先發行",
+ "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.": "遊戲的 DirectX 11 渲染器，執行於 Apple D3DMetal。較舊也較簡單；部分效果看起來不同。",
+ "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.": "DXVK 將 DirectX 11 轉換為 Vulkan，MoltenVK 再轉換為 Metal。首次駕駛時會因產生著色器而頓挫。",
+ "Downloads DXVK (2.8 MB) the first time.": "首次使用時下載 DXVK（2.8 MB）。",
+ "BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.": "BeamNG 自己的 Vulkan 渲染器，執行於 MoltenVK。實驗性：使用目前的 Wine 時啟動即當機；如發生請切換回去。",
+ "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "遊戲預設的 DirectX 12 渲染器，執行於 Apple D3DMetal。測試最完整。"
 }

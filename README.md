@@ -35,6 +35,14 @@ See the [comparison](#gamehub-vs-launcher) below.
   resolution with FSR 3, caps at 30 FPS, turns every effect off and removes parked cars (each one is a
   full physics vehicle). Your previous settings are backed up first, and switching it off restores
   them to normal values
+- **Renderer (pre-release, 1.4.0 beta):** pick how the game draws, then compare FPS with the
+  counter on:
+  - *Direct3D 12 · D3DMetal* (default, best tested)
+  - *Direct3D 11 · D3DMetal* (`-gfx dx11`)
+  - *Direct3D 11 · DXVK → MoltenVK*: DXVK-macOS translates D3D11 to Vulkan, MoltenVK translates
+    Vulkan to Metal. Downloads DXVK (2.8 MB, checksum-checked) the first time
+  - *Vulkan · MoltenVK*: BeamNG's own Vulkan renderer (`-gfx vulkan`). Experimental: with the current
+    Wine it crashes at start
 - **Advanced:** anti-aliasing (FSR 3 recommended), render scale, sharpness, shadows, meshes
 - **Controllers:** shows a ✓ when a controller or steering wheel is connected (Xbox/PlayStation pads,
   Logitech, Thrustmaster, Fanatec, Moza, Simucube), plus what BeamNG detected last time
@@ -107,14 +115,16 @@ Everything lives in `~/Library/Application Support/BeamNG-GPTK4/`:
 containers/wine_installations/   Wine copied from GameHub (APFS clone, nearly no extra space)
 containers/prefixes/beamng/      The Windows environment and your BeamNG user folder
 gptk/<version>/                  D3DMetal from Apple's .dmg (current → active version)
-addons/                          BeamMP launcher and BeamNG.Earth app, when you turn them on
-launcher.conf                    Game folder, launch options, Metal 4, FPS HUD, BeamMP, BeamNG.Earth
+addons/                          BeamMP launcher, BeamNG.Earth app and DXVK, when you turn them on
+launcher.conf                    Game folder, launch options, renderer, Metal 4, FPS HUD, BeamMP, BeamNG.Earth
 bin/                             launch.sh, quit.sh, install-gptk.sh, setup-runtime.sh
 ```
 
 `launch.sh` sets `WINEDLLPATH` and `WINE_GPTK_LIBD3DSHARED_PATH` to the chosen D3DMetal, `D3DM_MTL4=1`
 for Metal 4 and `MTL_HUD_ENABLED=1` for the FPS counter, then starts `BeamNG.drive.exe` with
-`-nogfxgpudriven`.
+`-nogfxgpudriven`. The renderer adds `-gfx dx11` or `-gfx vulkan`; for DXVK, `WINEDLLPATH` points at
+`addons/dxvk` instead, so DXVK's `d3d11.dll` is loaded in place of D3DMetal's and nothing in the
+Windows environment changes.
 
 ## Multiplayer (BeamMP)
 
@@ -155,6 +165,8 @@ and is not supported here; use ready-made packs (**…** menu → **Add map pack
 - **GPU-driven drawing** (`ExecuteIndirect` command signatures) still fails in D3DMetal 4.0 beta 3, so
   `-nogfxgpudriven` stays on. It costs some CPU-side performance in dense areas. Try turning it off
   in Advanced settings after each new GPTK release.
+- **Vulkan renderer:** BeamNG 0.40 crashes right after creating its Vulkan instance on the MoltenVK
+  that ships with GameHub's Wine. Use DXVK for a Vulkan path that works.
 - Borderless fullscreen covers the Dock and menu bar under Wine; windowed mode is recommended.
 
 ## GameHub vs launcher

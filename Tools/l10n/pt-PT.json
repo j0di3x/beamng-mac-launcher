@@ -167,5 +167,17 @@
  "Resolution scale": "Escala de resolução",
  "Renders at %@ and scales it up with FSR 3. Lower is faster but blurrier.": "Renderiza a %@ e amplia com o FSR 3. Mais baixo é mais rápido, mas mais desfocado.",
  "Lower it to render fewer pixels and get more FPS.": "Baixe-a para renderizar menos píxeis e ganhar FPS.",
- "Sharpness works with FSR 3.": "A nitidez funciona com o FSR 3."
+ "Sharpness works with FSR 3.": "A nitidez funciona com o FSR 3.",
+ "Renderer: %@. Used from the next start.": "Renderizador: %@. Usado a partir do próximo arranque.",
+ "Renderer: %@. Restart the game to use it.": "Renderizador: %@. Reinicie o jogo para o usar.",
+ "The DXVK download was damaged (checksum mismatch). Try again.": "A transferência do DXVK está danificada (checksum não coincide). Tente novamente.",
+ "Couldn't unpack DXVK.": "Não foi possível descomprimir o DXVK.",
+ "DXVK installed. Renderer: DXVK from the next start.": "DXVK instalado. Renderizador: DXVK a partir do próximo arranque.",
+ "Renderer": "Renderizador",
+ "pre-release": "pré-lançamento",
+ "The game's DirectX 11 renderer on Apple D3DMetal. Older and simpler; some effects look different.": "O renderizador DirectX 11 do jogo no Apple D3DMetal. Mais antigo e simples; alguns efeitos ficam diferentes.",
+ "DirectX 11 translated to Vulkan by DXVK, then to Metal by MoltenVK. The first drive stutters while shaders build.": "DirectX 11 traduzido para Vulkan pelo DXVK e depois para Metal pelo MoltenVK. A primeira condução tem soluços enquanto os shaders são criados.",
+ "Downloads DXVK (2.8 MB) the first time.": "Transfere o DXVK (2,8 MB) na primeira vez.",
+ "BeamNG's own Vulkan renderer on MoltenVK. Experimental: with the current Wine it crashes at start; switch back if it does.": "O renderizador Vulkan próprio do BeamNG no MoltenVK. Experimental: com o Wine atual falha ao arrancar; se acontecer, volte atrás.",
+ "The game's default DirectX 12 renderer on Apple D3DMetal. Best tested.": "O renderizador DirectX 12 predefinido do jogo no Apple D3DMetal. O mais testado."
 }
