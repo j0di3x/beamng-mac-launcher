@@ -194,5 +194,19 @@
  "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "接続されているディスプレイは 1 台です。もう 1 台つなぐとゲームのウインドウが両方に広がります。それまではこのディスプレイいっぱいに表示されます。",
  "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "「ディスプレイごとに個別の操作スペース」がオンのあいだ、macOS はウインドウを 1 台のディスプレイに収めます。「デスクトップとDock」（下のほうの Mission Control）でオフにしてから、ログアウトして再度ログインしてください。",
  "Open Desktop & Dock Settings": "「デスクトップとDock」設定を開く",
- "The game window covers %ld displays: %ld × %ld.": "ゲームのウインドウは %ld 台のディスプレイに広がります：%ld × %ld。"
+ "The game window covers %ld displays: %ld × %ld.": "ゲームのウインドウは %ld 台のディスプレイに広がります：%ld × %ld。",
+ "Advanced": "詳細",
+ "Runtime": "ランタイム",
+ "Almost ready": "もう少しで準備完了",
+ "Driving": "走行中",
+ "Ready to drive": "走行準備完了",
+ "Potato mode": "ポテトモード",
+ "works with FSR 3": "FSR 3 で有効",
+ "lower for more FPS": "下げると FPS が上がる",
+ "Compatibility switches and maintenance tools": "互換性の切り替えとメンテナンスツール",
+ "Adds anti-aliasing, sharpness, shadows and meshes to Graphics.": "グラフィックにアンチエイリアス、シャープネス、影、メッシュを追加します。",
+ "Direct3D 12 on D3DMetal": "D3DMetal 上の Direct3D 12",
+ "Direct3D 11 on D3DMetal": "D3DMetal 上の Direct3D 11",
+ "Direct3D 11 through DXVK": "DXVK 経由の Direct3D 11",
+ "Vulkan on MoltenVK": "MoltenVK 上の Vulkan"
 }

@@ -194,5 +194,19 @@
  "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "Podłączony jest tylko jeden ekran. Podłącz kolejny, a okno gry obejmie oba; do tego czasu wypełnia ten.",
  "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "macOS trzyma każde okno na jednym ekranie, dopóki włączona jest opcja „Ekrany mają oddzielne przestrzenie”. Wyłącz ją w ustawieniach Biurko i Dock (na dole, w sekcji Mission Control), a potem wyloguj się i zaloguj ponownie.",
  "Open Desktop & Dock Settings": "Otwórz ustawienia Biurko i Dock",
- "The game window covers %ld displays: %ld × %ld.": "Okno gry obejmuje ekrany: %ld, %ld × %ld."
+ "The game window covers %ld displays: %ld × %ld.": "Okno gry obejmuje ekrany: %ld, %ld × %ld.",
+ "Advanced": "Zaawansowane",
+ "Runtime": "Środowisko",
+ "Almost ready": "Prawie gotowe",
+ "Driving": "W trasie",
+ "Ready to drive": "Gotowy do jazdy",
+ "Potato mode": "Tryb ziemniaka",
+ "works with FSR 3": "działa z FSR 3",
+ "lower for more FPS": "niżej = więcej FPS",
+ "Compatibility switches and maintenance tools": "Przełączniki zgodności i narzędzia",
+ "Adds anti-aliasing, sharpness, shadows and meshes to Graphics.": "Dodaje do Grafiki wygładzanie, ostrość, cienie i siatki.",
+ "Direct3D 12 on D3DMetal": "Direct3D 12 na D3DMetal",
+ "Direct3D 11 on D3DMetal": "Direct3D 11 na D3DMetal",
+ "Direct3D 11 through DXVK": "Direct3D 11 przez DXVK",
+ "Vulkan on MoltenVK": "Vulkan na MoltenVK"
 }

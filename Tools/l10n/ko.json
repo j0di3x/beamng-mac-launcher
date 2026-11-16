@@ -194,5 +194,19 @@
  "Only one display is connected. Connect another and the game window covers both; until then it fills this one.": "디스플레이가 하나만 연결되어 있습니다. 하나를 더 연결하면 게임 창이 둘 다 덮고, 그때까지는 이 디스플레이를 채웁니다.",
  "macOS keeps each window on one display while “Displays have separate Spaces” is on. Turn it off in Desktop & Dock (near the bottom, under Mission Control), then log out and back in.": "'디스플레이마다 별도의 스페이스 사용'이 켜져 있으면 macOS는 창을 한 디스플레이에만 둡니다. 데스크탑 및 Dock(아래쪽 Mission Control)에서 끈 다음 로그아웃했다가 다시 로그인하세요.",
  "Open Desktop & Dock Settings": "데스크탑 및 Dock 설정 열기",
- "The game window covers %ld displays: %ld × %ld.": "게임 창이 디스플레이 %ld개를 덮습니다: %ld × %ld."
+ "The game window covers %ld displays: %ld × %ld.": "게임 창이 디스플레이 %ld개를 덮습니다: %ld × %ld.",
+ "Advanced": "고급",
+ "Runtime": "런타임",
+ "Almost ready": "거의 준비됨",
+ "Driving": "주행 중",
+ "Ready to drive": "주행 준비 완료",
+ "Potato mode": "감자 모드",
+ "works with FSR 3": "FSR 3에서 작동",
+ "lower for more FPS": "낮추면 FPS 증가",
+ "Compatibility switches and maintenance tools": "호환성 스위치와 유지 관리 도구",
+ "Adds anti-aliasing, sharpness, shadows and meshes to Graphics.": "그래픽에 안티앨리어싱, 선명도, 그림자, 메시를 추가합니다.",
+ "Direct3D 12 on D3DMetal": "D3DMetal 기반 Direct3D 12",
+ "Direct3D 11 on D3DMetal": "D3DMetal 기반 Direct3D 11",
+ "Direct3D 11 through DXVK": "DXVK를 통한 Direct3D 11",
+ "Vulkan on MoltenVK": "MoltenVK 기반 Vulkan"
 }
