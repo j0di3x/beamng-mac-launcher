@@ -247,5 +247,12 @@
  "GameHub is installed. Run any Windows game in it once so it sets up Wine, then import.": "已安裝 GameHub。請在其中執行一次任意 Windows 遊戲以設定 Wine，然後匯入。",
  "GameHub's Wine is ready to import. It takes a few seconds and almost no disk space.": "GameHub 的 Wine 可以匯入了。只需幾秒，幾乎不占空間。",
  "Found BeamNG.drive in %@.": "在 %@ 中找到 BeamNG.drive。",
- "Couldn't find BeamNG.drive. Choose its folder instead.": "找不到 BeamNG.drive。請手動選擇它的資料夾。"
+ "Couldn't find BeamNG.drive. Choose its folder instead.": "找不到 BeamNG.drive。請手動選擇它的資料夾。",
+ "Wheel force feedback": "方向盤力回饋",
+ "Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels.": "需要 PedalBox App。支援羅技 G29、G27、G25 和 Driving Force。",
+ "Experimental. PedalBox plays the game's steering force on Logitech wheels.": "實驗性功能。PedalBox 會將遊戲中的轉向力傳到羅技方向盤。",
+ "PedalBox isn't installed.": "尚未安裝 PedalBox。",
+ "Force feedback turned on. PedalBox starts with the game.": "力回饋已開啟。PedalBox 會隨遊戲啟動。",
+ "Force feedback turned off.": "力回饋已關閉。",
+ "PedalBox isn't installed, so the wheel has no force feedback.": "尚未安裝 PedalBox，因此方向盤沒有力回饋。"
 }

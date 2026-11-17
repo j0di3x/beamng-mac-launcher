@@ -247,5 +247,12 @@
  "GameHub is installed. Run any Windows game in it once so it sets up Wine, then import.": "GameHub가 설치되어 있습니다. Wine이 준비되도록 Windows 게임을 한 번 실행한 다음 가져오세요.",
  "GameHub's Wine is ready to import. It takes a few seconds and almost no disk space.": "GameHub의 Wine을 가져올 수 있습니다. 몇 초면 되고 공간도 거의 쓰지 않습니다.",
  "Found BeamNG.drive in %@.": "%@에서 BeamNG.drive를 찾았습니다.",
- "Couldn't find BeamNG.drive. Choose its folder instead.": "BeamNG.drive를 찾을 수 없습니다. 폴더를 직접 선택하세요."
+ "Couldn't find BeamNG.drive. Choose its folder instead.": "BeamNG.drive를 찾을 수 없습니다. 폴더를 직접 선택하세요.",
+ "Wheel force feedback": "휠 포스 피드백",
+ "Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels.": "PedalBox 앱이 필요합니다. Logitech G29, G27, G25, Driving Force 휠.",
+ "Experimental. PedalBox plays the game's steering force on Logitech wheels.": "실험적 기능. PedalBox가 게임의 조향 힘을 Logitech 휠에 전달합니다.",
+ "PedalBox isn't installed.": "PedalBox가 설치되어 있지 않습니다.",
+ "Force feedback turned on. PedalBox starts with the game.": "포스 피드백을 켰습니다. PedalBox는 게임과 함께 시작됩니다.",
+ "Force feedback turned off.": "포스 피드백을 껐습니다.",
+ "PedalBox isn't installed, so the wheel has no force feedback.": "PedalBox가 설치되어 있지 않아 휠에 포스 피드백이 없습니다."
 }

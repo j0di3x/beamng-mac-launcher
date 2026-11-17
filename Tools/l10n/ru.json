@@ -247,5 +247,12 @@
  "GameHub is installed. Run any Windows game in it once so it sets up Wine, then import.": "GameHub установлен. Запустите в нём любую Windows-игру один раз, чтобы он настроил Wine, затем импортируйте.",
  "GameHub's Wine is ready to import. It takes a few seconds and almost no disk space.": "Wine из GameHub готов к импорту. Это займёт несколько секунд и почти не займёт места.",
  "Found BeamNG.drive in %@.": "BeamNG.drive найден в %@.",
- "Couldn't find BeamNG.drive. Choose its folder instead.": "BeamNG.drive не найден. Выберите его папку."
+ "Couldn't find BeamNG.drive. Choose its folder instead.": "BeamNG.drive не найден. Выберите его папку.",
+ "Wheel force feedback": "Отдача руля",
+ "Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels.": "Нужно приложение PedalBox. Рули Logitech G29, G27, G25 и Driving Force.",
+ "Experimental. PedalBox plays the game's steering force on Logitech wheels.": "Экспериментально. PedalBox передаёт усилие на руле из игры на рули Logitech.",
+ "PedalBox isn't installed.": "PedalBox не установлен.",
+ "Force feedback turned on. PedalBox starts with the game.": "Отдача включена. PedalBox запускается вместе с игрой.",
+ "Force feedback turned off.": "Отдача выключена.",
+ "PedalBox isn't installed, so the wheel has no force feedback.": "PedalBox не установлен, поэтому у руля нет отдачи."
 }

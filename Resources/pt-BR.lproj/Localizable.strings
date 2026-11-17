@@ -99,6 +99,9 @@
 "Plug one in over USB or pair it with Bluetooth. Xbox, PlayStation and Switch pads work." = "Conecte por USB ou pareie por Bluetooth. Controles de Xbox, PlayStation e Switch funcionam.";
 "Steering wheel" = "Volante";
 "Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB." = "Volantes Logitech, Thrustmaster, Fanatec, Moza e Simucube são reconhecidos por USB.";
+"Wheel force feedback" = "Force feedback do volante";
+"Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels." = "Precisa do app PedalBox. Volantes Logitech G29, G27, G25 e Driving Force.";
+"Experimental. PedalBox plays the game's steering force on Logitech wheels." = "Experimental. O PedalBox aplica a força da direção do jogo em volantes Logitech.";
 "BeamNG saw last time: %@" = "O BeamNG detectou da última vez: %@";
 "Language" = "Idioma";
 "Game" = "Jogo";
@@ -177,6 +180,10 @@
 "Quit the game first to change mods." = "Feche o jogo antes de mudar os mods.";
 "Fog fix turned on." = "Correção de neblina ativada.";
 "Fog fix turned off." = "Correção de neblina desativada.";
+"PedalBox isn't installed." = "O PedalBox não está instalado.";
+"Force feedback turned on. PedalBox starts with the game." = "Force feedback ativado. O PedalBox abre junto com o jogo.";
+"Force feedback turned off." = "Force feedback desativado.";
+"PedalBox isn't installed, so the wheel has no force feedback." = "O PedalBox não está instalado, então o volante fica sem force feedback.";
 "Starting the game" = "Abrindo o jogo";
 "In the menus" = "Nos menus";
 "Driving %@" = "Dirigindo %@";

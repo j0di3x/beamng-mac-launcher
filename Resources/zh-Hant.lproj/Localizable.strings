@@ -99,6 +99,9 @@
 "Plug one in over USB or pair it with Bluetooth. Xbox, PlayStation and Switch pads work." = "透過 USB 連接或以藍牙配對。支援 Xbox、PlayStation 和 Switch 手把。";
 "Steering wheel" = "方向盤";
 "Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB." = "Logitech、Thrustmaster、Fanatec、Moza 和 Simucube 方向盤可透過 USB 辨識。";
+"Wheel force feedback" = "方向盤力回饋";
+"Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels." = "需要 PedalBox App。支援羅技 G29、G27、G25 和 Driving Force。";
+"Experimental. PedalBox plays the game's steering force on Logitech wheels." = "實驗性功能。PedalBox 會將遊戲中的轉向力傳到羅技方向盤。";
 "BeamNG saw last time: %@" = "BeamNG 上次偵測到：%@";
 "Language" = "語言";
 "Game" = "遊戲";
@@ -177,6 +180,10 @@
 "Quit the game first to change mods." = "請先退出遊戲再更改模組。";
 "Fog fix turned on." = "已開啓霧效修復。";
 "Fog fix turned off." = "已關閉霧效修復。";
+"PedalBox isn't installed." = "尚未安裝 PedalBox。";
+"Force feedback turned on. PedalBox starts with the game." = "力回饋已開啟。PedalBox 會隨遊戲啟動。";
+"Force feedback turned off." = "力回饋已關閉。";
+"PedalBox isn't installed, so the wheel has no force feedback." = "尚未安裝 PedalBox，因此方向盤沒有力回饋。";
 "Starting the game" = "正在啟動遊戲";
 "In the menus" = "在選單中";
 "Driving %@" = "駕駛 %@";

@@ -592,6 +592,14 @@ struct ContentView: View {
                     Divider()
                     deviceRow(icon: "steeringwheel", title: L("Steering wheel"), items: wheels.map { "\($0.name) · \(L($0.connection))" },
                               empty: L("Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB."))
+                    Divider()
+                    SettingRow(title: L("Wheel force feedback"),
+                               detail: m.pedalBoxURL == nil ? L("Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels.")
+                                                            : L("Experimental. PedalBox plays the game's steering force on Logitech wheels.")) {
+                        SwitchToggle(isOn: Binding(get: { m.conf.ffb }, set: { m.setForceFeedback($0) }))
+                            .disabled(m.pedalBoxURL == nil && !m.conf.ffb)
+                    }
+                    .padding(.vertical, 10)
                     if !m.seenByGame.isEmpty {
                         Divider()
                         Caption(L("BeamNG saw last time: %@", m.seenByGame.joined(separator: ", ")))

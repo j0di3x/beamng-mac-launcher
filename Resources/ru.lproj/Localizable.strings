@@ -99,6 +99,9 @@
 "Plug one in over USB or pair it with Bluetooth. Xbox, PlayStation and Switch pads work." = "Подключите по USB или через Bluetooth. Подходят геймпады Xbox, PlayStation и Switch.";
 "Steering wheel" = "Руль";
 "Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB." = "Рули Logitech, Thrustmaster, Fanatec, Moza и Simucube определяются по USB.";
+"Wheel force feedback" = "Отдача руля";
+"Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels." = "Нужно приложение PedalBox. Рули Logitech G29, G27, G25 и Driving Force.";
+"Experimental. PedalBox plays the game's steering force on Logitech wheels." = "Экспериментально. PedalBox передаёт усилие на руле из игры на рули Logitech.";
 "BeamNG saw last time: %@" = "BeamNG в прошлый раз обнаружил: %@";
 "Language" = "Язык";
 "Game" = "Игра";
@@ -177,6 +180,10 @@
 "Quit the game first to change mods." = "Чтобы изменить моды, сначала закройте игру.";
 "Fog fix turned on." = "Исправление тумана включено.";
 "Fog fix turned off." = "Исправление тумана выключено.";
+"PedalBox isn't installed." = "PedalBox не установлен.";
+"Force feedback turned on. PedalBox starts with the game." = "Отдача включена. PedalBox запускается вместе с игрой.";
+"Force feedback turned off." = "Отдача выключена.";
+"PedalBox isn't installed, so the wheel has no force feedback." = "PedalBox не установлен, поэтому у руля нет отдачи.";
 "Starting the game" = "Запуск игры";
 "In the menus" = "В меню";
 "Driving %@" = "За рулём: %@";

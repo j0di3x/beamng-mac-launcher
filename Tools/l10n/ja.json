@@ -247,5 +247,12 @@
  "GameHub is installed. Run any Windows game in it once so it sets up Wine, then import.": "GameHub はインストール済みです。Wine を準備するため Windows ゲームを一度起動してから読み込んでください。",
  "GameHub's Wine is ready to import. It takes a few seconds and almost no disk space.": "GameHub の Wine を読み込めます。数秒で終わり、容量もほとんど使いません。",
  "Found BeamNG.drive in %@.": "BeamNG.drive が %@ に見つかりました。",
- "Couldn't find BeamNG.drive. Choose its folder instead.": "BeamNG.drive が見つかりません。フォルダを選んでください。"
+ "Couldn't find BeamNG.drive. Choose its folder instead.": "BeamNG.drive が見つかりません。フォルダを選んでください。",
+ "Wheel force feedback": "ハンドルのフォースフィードバック",
+ "Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels.": "PedalBox アプリが必要です。Logitech G29、G27、G25、Driving Force に対応。",
+ "Experimental. PedalBox plays the game's steering force on Logitech wheels.": "実験的機能。PedalBox がゲームのステアリングの力を Logitech ハンドルに伝えます。",
+ "PedalBox isn't installed.": "PedalBox がインストールされていません。",
+ "Force feedback turned on. PedalBox starts with the game.": "フォースフィードバックをオンにしました。PedalBox はゲームと一緒に起動します。",
+ "Force feedback turned off.": "フォースフィードバックをオフにしました。",
+ "PedalBox isn't installed, so the wheel has no force feedback.": "PedalBox がインストールされていないため、ハンドルにフォースフィードバックはありません。"
 }

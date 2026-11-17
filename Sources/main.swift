@@ -40,6 +40,7 @@ enum Paths {
     static let dxvk = addons.appendingPathComponent("dxvk")
     static let dxvkDll = dxvk.appendingPathComponent("x86_64-windows/d3d11.dll")
     static let earthMod = mods.appendingPathComponent("unpacked/beamng_earth")
+    static let ffbMod = mods.appendingPathComponent("unpacked/pedalboxFFB")
     static let earthngPlanet = mods.appendingPathComponent("earthng_planet.zip")
     static let beamngIni = prefix.appendingPathComponent("drive_c/users/steamuser/AppData/Local/BeamNG/BeamNG.drive.ini")
     static var userCache: URL {
@@ -91,6 +92,7 @@ struct LauncherConfig {
     var renderer = "d3d12"   // d3d12, d3d11, vulkan, dxvk
     var span = false         // stretch the game window across all displays
     var hidraw = ""          // wheels Wine should pass through as raw HID, "0x046D/0xC24F,…" (set at each start)
+    var ffb = false          // wheel force feedback through PedalBox
 
     static func load() -> LauncherConfig {
         var c = LauncherConfig()
@@ -114,6 +116,7 @@ struct LauncherConfig {
             case "DISCORD": c.discord = val != "0"
             case "SPAN": c.span = val == "1"
             case "HIDRAW": c.hidraw = val
+            case "FFB": c.ffb = val == "1"
             case "RENDERER": c.renderer = ["d3d12", "d3d11", "vulkan", "dxvk"].contains(val) ? val : "d3d12"
             default: break
             }
@@ -137,6 +140,7 @@ struct LauncherConfig {
         RENDERER=\(renderer)
         SPAN=\(span ? 1 : 0)
         HIDRAW=\(q(hidraw))
+        FFB=\(ffb ? 1 : 0)
 
         """
         try? FileManager.default.createDirectory(at: Paths.root, withIntermediateDirectories: true)
@@ -894,6 +898,48 @@ final class Launcher: ObservableObject {
         message = on ? L("Fog fix turned on.") : L("Fog fix turned off.")
     }
 
+    // MARK: force feedback (PedalBox)
+
+    static let pedalBoxID = "local.pedalbox.PedalBox"
+    var pedalBoxURL: URL? { NSWorkspace.shared.urlForApplication(withBundleIdentifier: Self.pedalBoxID) }
+
+    /// The mod sends BeamNG's steering force to PedalBox over UDP; PedalBox drives the wheel's motor.
+    func setForceFeedback(_ on: Bool) {
+        guard state == .stopped else { message = L("Quit the game first to change mods."); return }
+        if on && pedalBoxURL == nil { message = L("PedalBox isn't installed."); return }
+        conf.ffb = on; conf.save()
+        if on { installFFBMod() } else { try? FileManager.default.removeItem(at: Paths.ffbMod) }
+        message = on ? L("Force feedback turned on. PedalBox starts with the game.") : L("Force feedback turned off.")
+    }
+
+    /// Copies the mod fresh each time, so a launcher update also updates the mod.
+    private func installFFBMod() {
+        let fm = FileManager.default
+        guard let src = Bundle.main.resourceURL?.appendingPathComponent("pedalboxFFB") else { return }
+        try? fm.removeItem(at: Paths.ffbMod)
+        try? fm.createDirectory(at: Paths.ffbMod.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? fm.copyItem(at: src, to: Paths.ffbMod)
+        // the game remembers mods it has seen; make sure this one isn't switched off there
+        let db = Paths.mods.appendingPathComponent("db.json")
+        if var obj = (try? Data(contentsOf: db)).flatMap({ try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }),
+           var mods = obj["mods"] as? [String: Any], var e = mods["pedalboxffb"] as? [String: Any], e["active"] as? Bool == false {
+            e["active"] = true; mods["pedalboxffb"] = e; obj["mods"] = mods
+            if let d = try? JSONSerialization.data(withJSONObject: obj, options: [.prettyPrinted]) { try? d.write(to: db) }
+        }
+    }
+
+    private func startForceFeedback() {
+        installFFBMod()
+        guard let app = pedalBoxURL else { message = L("PedalBox isn't installed, so the wheel has no force feedback."); return }
+        let cfg = NSWorkspace.OpenConfiguration()
+        cfg.activates = false
+        cfg.arguments = ["-ffbEnabled", "YES"]
+        NSWorkspace.shared.openApplication(at: app, configuration: cfg) { _, _ in
+            // arguments only reach a PedalBox that wasn't open yet; tell a running one directly
+            DistributedNotificationCenter.default().postNotificationName(.init("local.pedalbox.ffb.enable"), object: nil, deliverImmediately: true)
+        }
+    }
+
     // MARK: Discord
 
     func updateDiscord() {
@@ -1256,6 +1302,7 @@ final class Launcher: ObservableObject {
         if conf.beammp { writeBeamNGIni() }
         if !pendingChanges.isEmpty { GameSettingsFile.merge(pendingChanges); pendingChanges = [:] }
         applySpan()
+        if conf.ffb { startForceFeedback() }
         runShell(Paths.bin.appendingPathComponent("launch.sh"), wait: false)
         state = .starting; lastState = .starting
         message = L("Starting BeamNG…")

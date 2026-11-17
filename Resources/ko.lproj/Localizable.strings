@@ -99,6 +99,9 @@
 "Plug one in over USB or pair it with Bluetooth. Xbox, PlayStation and Switch pads work." = "USB로 연결하거나 Bluetooth로 페어링하세요. Xbox, PlayStation, Switch 컨트롤러를 지원합니다.";
 "Steering wheel" = "레이싱 휠";
 "Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB." = "Logitech, Thrustmaster, Fanatec, Moza, Simucube 휠은 USB로 인식됩니다.";
+"Wheel force feedback" = "휠 포스 피드백";
+"Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels." = "PedalBox 앱이 필요합니다. Logitech G29, G27, G25, Driving Force 휠.";
+"Experimental. PedalBox plays the game's steering force on Logitech wheels." = "실험적 기능. PedalBox가 게임의 조향 힘을 Logitech 휠에 전달합니다.";
 "BeamNG saw last time: %@" = "지난번 BeamNG가 감지한 장치: %@";
 "Language" = "언어";
 "Game" = "게임";
@@ -177,6 +180,10 @@
 "Quit the game first to change mods." = "모드를 변경하려면 먼저 게임을 종료하세요.";
 "Fog fix turned on." = "안개 수정을 켰습니다.";
 "Fog fix turned off." = "안개 수정을 껐습니다.";
+"PedalBox isn't installed." = "PedalBox가 설치되어 있지 않습니다.";
+"Force feedback turned on. PedalBox starts with the game." = "포스 피드백을 켰습니다. PedalBox는 게임과 함께 시작됩니다.";
+"Force feedback turned off." = "포스 피드백을 껐습니다.";
+"PedalBox isn't installed, so the wheel has no force feedback." = "PedalBox가 설치되어 있지 않아 휠에 포스 피드백이 없습니다.";
 "Starting the game" = "게임 시작 중";
 "In the menus" = "메뉴 화면";
 "Driving %@" = "%@ 운전 중";

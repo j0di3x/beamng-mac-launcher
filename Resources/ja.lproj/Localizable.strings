@@ -99,6 +99,9 @@
 "Plug one in over USB or pair it with Bluetooth. Xbox, PlayStation and Switch pads work." = "USB で接続するか Bluetooth でペアリングしてください。Xbox、PlayStation、Switch のコントローラが使えます。";
 "Steering wheel" = "ハンドル";
 "Logitech, Thrustmaster, Fanatec, Moza and Simucube wheels are recognised over USB." = "Logitech、Thrustmaster、Fanatec、Moza、Simucube のハンドルは USB で認識されます。";
+"Wheel force feedback" = "ハンドルのフォースフィードバック";
+"Needs the PedalBox app. Logitech G29, G27, G25 and Driving Force wheels." = "PedalBox アプリが必要です。Logitech G29、G27、G25、Driving Force に対応。";
+"Experimental. PedalBox plays the game's steering force on Logitech wheels." = "実験的機能。PedalBox がゲームのステアリングの力を Logitech ハンドルに伝えます。";
 "BeamNG saw last time: %@" = "前回BeamNGが検出したもの：%@";
 "Language" = "言語";
 "Game" = "ゲーム";
@@ -177,6 +180,10 @@
 "Quit the game first to change mods." = "MODを変更するには、先にゲームを終了してください。";
 "Fog fix turned on." = "霧の修正をオンにしました。";
 "Fog fix turned off." = "霧の修正をオフにしました。";
+"PedalBox isn't installed." = "PedalBox がインストールされていません。";
+"Force feedback turned on. PedalBox starts with the game." = "フォースフィードバックをオンにしました。PedalBox はゲームと一緒に起動します。";
+"Force feedback turned off." = "フォースフィードバックをオフにしました。";
+"PedalBox isn't installed, so the wheel has no force feedback." = "PedalBox がインストールされていないため、ハンドルにフォースフィードバックはありません。";
 "Starting the game" = "ゲームを起動中";
 "In the menus" = "メニュー画面";
 "Driving %@" = "%@ を運転中";

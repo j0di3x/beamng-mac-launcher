@@ -58,7 +58,10 @@ See the [comparison](#gamehub-vs-launcher) below.
   Logitech, Thrustmaster, Fanatec, Moza, Simucube), plus what BeamNG detected last time
 - **Steering wheels:** Wine normally hides wheels it doesn't know, such as the Logitech G29. The
   launcher tells Wine to pass every connected wheel (and Logitech's PC/PS wheels) straight to the
-  game, so BeamNG sees steering, pedals and buttons. Force feedback isn't passed through yet
+  game, so BeamNG sees steering, pedals and buttons
+- **Wheel force feedback (experimental):** with [PedalBox](https://github.com/j0di3x/PedalBox)
+  installed, one switch adds a small mod that sends BeamNG's steering force to PedalBox, which
+  drives the motor of Logitech wheels (G29, G27, G25, Driving Force)
 - **Compatibility switches:** missing-objects fix, Metal 4, optional fog-off mod, GPTK version picker
 - **Tools:** clear shader caches, reset to recommended settings (with backup), choose game folder
 - **Multiplayer:** one switch for [BeamMP](https://beammp.com). The launcher downloads the official
